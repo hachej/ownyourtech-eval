@@ -2,11 +2,14 @@
 set -euo pipefail
 
 # Usage: ./eval.sh <scenario-name> [--model <model>] [--budget <usd>]
-# Example: ./eval.sh github --model claude-sonnet-4-20250514 --budget 5.00
+# Example: ./eval.sh github --model claude-sonnet-4-6 --budget 5.00
 
-EVALS_DIR="$(cd "$(dirname "$0")" && pwd)"
+EVAL_DIR="$(cd "$(dirname "$0")" && pwd)"
+SRC_DIR="$(cd "$EVAL_DIR/.." && pwd)"
+REPO_ROOT="$(cd "$SRC_DIR/.." && pwd)"
+
 SCENARIO_NAME="${1:?Usage: eval.sh <scenario-name>}"
-SCENARIO_DIR="$EVALS_DIR/scenarios/$SCENARIO_NAME"
+SCENARIO_DIR="$SRC_DIR/scenarios/$SCENARIO_NAME"
 MODEL="${MODEL:-claude-sonnet-4-6}"
 BUDGET="${BUDGET:-5.00}"
 
@@ -29,7 +32,7 @@ fi
 # Create isolated workdir for agent
 WORKDIR=$(mktemp -d "/tmp/eval-${SCENARIO_NAME}-XXXXXX")
 RUN_ID="$(date +%Y%m%d-%H%M%S)-${MODEL##*-}"
-RESULTS_DIR="$EVALS_DIR/results/$SCENARIO_NAME/$RUN_ID"
+RESULTS_DIR="$REPO_ROOT/results/$SCENARIO_NAME/$RUN_ID"
 mkdir -p "$RESULTS_DIR"
 
 echo "=== Eval: $SCENARIO_NAME ==="
@@ -41,26 +44,38 @@ echo ""
 
 # --- Step 1: Setup sources ---
 echo "--- Setting up sources ---"
-cd "$EVALS_DIR"
-docker compose up -d --wait 2>&1 | tail -5
+cd "$EVAL_DIR"
+docker compose -f "$EVAL_DIR/docker-compose.yaml" up -d --wait 2>&1 | tail -5
+
+SOURCES_DIR="$SRC_DIR/data-sources"
 
 # Load data into Postgres
-echo "Loading Postgres data..."
-bash sources/github/postgres_init.sh "$EVALS_DIR/sources/github"
+if [ -f "$SOURCES_DIR/$SCENARIO_NAME/postgres_init.sh" ]; then
+  echo "Loading Postgres data..."
+  bash "$SOURCES_DIR/$SCENARIO_NAME/postgres_init.sh" "$SOURCES_DIR/$SCENARIO_NAME"
+fi
 
 # Load data into MongoDB
-echo "Loading MongoDB data..."
-python3 sources/github/mongo_init.py
+if [ -f "$SOURCES_DIR/$SCENARIO_NAME/mongo_init.py" ]; then
+  echo "Loading MongoDB data..."
+  python3 "$SOURCES_DIR/$SCENARIO_NAME/mongo_init.py"
+fi
 
 # Load data into S3
-echo "Loading S3 data..."
-bash sources/github/s3_init.sh "$EVALS_DIR/sources/github"
+if [ -f "$SOURCES_DIR/$SCENARIO_NAME/s3_init.sh" ]; then
+  echo "Loading S3 data..."
+  bash "$SOURCES_DIR/$SCENARIO_NAME/s3_init.sh" "$SOURCES_DIR/$SCENARIO_NAME"
+fi
 
 # Copy flat files into workdir
 echo "Copying flat files..."
-mkdir -p "$WORKDIR/data/github"
-cp sources/github/data/github/requested_reviewer_history.csv "$WORKDIR/data/github/"
-cp sources/github/data/github/issue_label.csv "$WORKDIR/data/github/"
+if [ -d "$SOURCES_DIR/$SCENARIO_NAME/data/$SCENARIO_NAME" ]; then
+  mkdir -p "$WORKDIR/data/$SCENARIO_NAME"
+  # Copy only flat files referenced in source.yaml (csv, jsonl)
+  for f in "$SOURCES_DIR/$SCENARIO_NAME/data/$SCENARIO_NAME"/*.csv "$SOURCES_DIR/$SCENARIO_NAME/data/$SCENARIO_NAME"/*.jsonl; do
+    [ -f "$f" ] && cp "$f" "$WORKDIR/data/$SCENARIO_NAME/"
+  done
+fi
 
 echo "Sources ready."
 echo ""
@@ -68,7 +83,7 @@ echo ""
 # --- Step 2: Prepare workdir ---
 git init -q "$WORKDIR"
 cp "$SCENARIO_DIR/SPEC.md" "$WORKDIR/SPEC.md"
-cp "$EVALS_DIR/CLAUDE.md" "$WORKDIR/CLAUDE.md"
+cp "$EVAL_DIR/CLAUDE.md" "$WORKDIR/CLAUDE.md"
 
 # Export credentials as env vars
 echo "--- Credentials ---"
@@ -93,10 +108,9 @@ cd "$WORKDIR"
 
 START_TIME=$(date +%s)
 
-AGENT_INSTRUCTIONS=$(cat "$EVALS_DIR/CLAUDE.md")
+AGENT_INSTRUCTIONS=$(cat "$EVAL_DIR/CLAUDE.md")
 
-REPO_ROOT="$(cd "$EVALS_DIR/.." && pwd)"
-env -u CLAUDECODE OYT_KB_PATH="$REPO_ROOT/kg" claude \
+env -u CLAUDECODE OYT_KB_PATH="${OYT_KB_PATH:-}" claude \
   -p \
   --dangerously-skip-permissions \
   --model "$MODEL" \
@@ -148,7 +162,7 @@ echo ""
 
 # --- Step 5: Run judges ---
 echo "--- Running judges ---"
-python3 "$EVALS_DIR/bin/run_judges.py" \
+python3 "$SRC_DIR/judges/run_judges.py" \
   "$SCENARIO_DIR" "$WORKDIR" "$RESULTS_DIR" "$MODEL" \
   | tee "$RESULTS_DIR/judges.log" || true
 

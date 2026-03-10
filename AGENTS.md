@@ -11,7 +11,7 @@ The knowledge base and `oyt` CLI live in the **private** ownyourtech-cli repo. T
 ## Architecture
 
 ```
-eval.sh <scenario-name> [--model <model>] [--budget <usd>]
+src/eval/eval.sh <scenario-name> [--model <model>] [--budget <usd>]
   │
   ├── docker compose up ─── eval-postgres (5433)
   │                     ├── eval-mongodb  (27017)
@@ -44,24 +44,24 @@ eval.sh <scenario-name> [--model <model>] [--budget <usd>]
 
 | File | What it does |
 |------|-------------|
-| `evals/eval.sh` | Orchestrator. Parses flags, starts Docker, loads data, creates workdir, runs agent, runs judges, writes metadata. |
-| `evals/docker-compose.yaml` | 4 services: `eval-postgres` (:5433), `eval-mongodb` (:27017), `eval-localstack` (:4566), `eval-api` (:5055). |
-| `evals/CLAUDE.md` | Injected into agent context. Tells agent: plan first, evaluate tech with `oyt kg evaluate`, then execute. Two-phase workflow. |
-| `evals/system-prompt.md` | Alternative system prompt. Describes mandatory workflow and output structure (`stack/` + `report.md`). |
+| `src/eval/eval.sh` | Orchestrator. Parses flags, starts Docker, loads data, creates workdir, runs agent, runs judges, writes metadata. Generic — auto-detects init scripts per scenario. |
+| `src/eval/docker-compose.yaml` | 4 services: `eval-postgres` (:5433), `eval-mongodb` (:27017), `eval-localstack` (:4566), `eval-api` (:5055). |
+| `src/eval/CLAUDE.md` | Injected into agent context. Tells agent: plan first, evaluate tech with `oyt kg evaluate`, then execute. Two-phase workflow. |
+| `src/eval/system-prompt.md` | Alternative system prompt. Describes mandatory workflow and output structure (`stack/` + `report.md`). |
 
-### Sources
+### Data sources
 
 A "source" is a dataset loaded into Docker services. Each source has init scripts and CSV data.
 
 | File | What it does |
 |------|-------------|
-| `sources/github/source.yaml` | Declares 14 tables across 5 source types: postgres (4), mongodb (4), rest_api (3), s3 (1), flat_files (2). |
-| `sources/github/postgres_init.sh` | Creates `github` database. Creates tables: `issue`, `issue_closed_history`, `pull_request`, `users`. Loads via `\COPY` from CSVs. Takes data dir as `$1`. |
-| `sources/github/mongo_init.py` | Drops+recreates `github` db. Loads 4 collections: `issue_comment`, `label`, `pull_request_review`, `team`. Reads `MONGO_URI` from env. |
-| `sources/github/s3_init.sh` | Creates `github-bucket` in LocalStack, uploads `repo_team.jsonl`. Uses `aws` CLI with `--endpoint-url`. |
-| `sources/github/api_server.py` | Flask app on port 5055. Three routes: `GET /github/issue_assignee`, `GET /github/issue_merged`, `GET /github/repository`. Each reads from CSV, returns JSON array. |
-| `sources/github/data/github/*.csv` | 14 source CSV files (~200KB total). Committed to git. |
-| `sources/github/gt/github/*.csv` | 6 ground truth CSVs. Column names must match exactly (case-insensitive). Rows sorted by first two columns. |
+| `src/data-sources/github/source.yaml` | Declares 14 tables across 5 source types: postgres (4), mongodb (4), rest_api (3), s3 (1), flat_files (2). |
+| `src/data-sources/github/postgres_init.sh` | Creates `github` database. Creates tables: `issue`, `issue_closed_history`, `pull_request`, `users`. Loads via `\COPY` from CSVs. Takes data dir as `$1`. |
+| `src/data-sources/github/mongo_init.py` | Drops+recreates `github` db. Loads 4 collections: `issue_comment`, `label`, `pull_request_review`, `team`. Reads `MONGO_URI` from env. |
+| `src/data-sources/github/s3_init.sh` | Creates `github-bucket` in LocalStack, uploads `repo_team.jsonl`. Uses `aws` CLI with `--endpoint-url`. |
+| `src/data-sources/github/api_server.py` | Flask app on port 5055. Three routes: `GET /github/issue_assignee`, `GET /github/issue_merged`, `GET /github/repository`. Each reads from CSV, returns JSON array. |
+| `src/data-sources/github/data/github/*.csv` | 14 source CSV files (~200KB total). Committed to git. |
+| `src/data-sources/github/gt/github/*.csv` | 6 ground truth CSVs. Column names must match exactly (case-insensitive). Rows sorted by first two columns. |
 
 **To understand the source data**, read `source.yaml` for the schema overview, then look at the CSV headers for exact column names.
 
@@ -71,8 +71,8 @@ A scenario ties a source dataset to a task spec and scoring config.
 
 | File | What it does |
 |------|-------------|
-| `scenarios/github/scenario.yaml` | Defines: name, credentials (as `KEY=VALUE` list), which judges to run, expected models with ground truth paths. |
-| `scenarios/github/SPEC.md` | The task the agent sees. Describes all sources (connection strings, tables, columns), all 6 expected output models (column-level specs), deliverable format, constraints. |
+| `src/scenarios/github/scenario.yaml` | Defines: name, credentials (as `KEY=VALUE` list), which judges to run, expected models with ground truth paths. |
+| `src/scenarios/github/SPEC.md` | The task the agent sees. Describes all sources (connection strings, tables, columns), all 6 expected output models (column-level specs), deliverable format, constraints. |
 
 **`scenario.yaml` is the central config.** It connects everything: source → credentials → spec → judges → ground truth.
 
@@ -88,12 +88,12 @@ Prompt judges take priority: if both `foo.md` and `foo.py` exist, the `.md` wins
 
 | File | Type | What it checks |
 |------|------|---------------|
-| `judges/base.py` | Framework | Resolves judges by name (`<name>.md` or `<name>.py`). `run_prompt_judge()` sends rubric + agent code to Claude. `run_code_judge()` imports and calls `judge()`. `collect_source_files()` gathers agent's code (up to 3000 lines). `parse_json_from_text()` extracts JSON from LLM output. |
-| `judges/correctness.py` | Code | Finds agent's database files (DuckDB `.duckdb` or SQLite `.db`/`.sqlite`). Exports each expected model to CSV via CLI. Compares column-by-column against ground truth. Numeric tolerance: 1%. Case-insensitive column matching. |
-| `judges/code_quality.md` | Prompt | Scores 4 dimensions (0-10 each): structure & modularity, error handling, readability, documentation. Pass threshold: 24/40 (60%). |
-| `judges/kg_compliance.md` | Prompt | Checks Tier 1 violations (auto-fail), Tier 2 deviations (should be justified), Tier 3 preferences, anti-patterns (over-engineering, vendor lock-in, hardcoded creds). |
-| `bin/run_judges.py` | Runner | CLI that reads scenario.yaml, builds judge context dict, runs all judges, prints verdicts, saves `verdicts.json`. |
-| `bin/check.py` | Standalone | Same correctness logic as the judge. CLI: `python check.py <scenario-dir> <output-dir>`. |
+| `src/judges/base.py` | Framework | Resolves judges by name (`<name>.md` or `<name>.py`). `run_prompt_judge()` sends rubric + agent code to Claude. `run_code_judge()` imports and calls `judge()`. `collect_source_files()` gathers agent's code (up to 3000 lines). `parse_json_from_text()` extracts JSON from LLM output. |
+| `src/judges/correctness.py` | Code | Finds agent's database files (DuckDB `.duckdb` or SQLite `.db`/`.sqlite`). Exports each expected model to CSV via CLI. Compares column-by-column against ground truth. Numeric tolerance: 1%. Case-insensitive column matching. |
+| `src/judges/code_quality.md` | Prompt | Scores 4 dimensions (0-10 each): structure & modularity, error handling, readability, documentation. Pass threshold: 24/40 (60%). |
+| `src/judges/kg_compliance.md` | Prompt | Checks Tier 1 violations (auto-fail), Tier 2 deviations (should be justified), Tier 3 preferences, anti-patterns (over-engineering, vendor lock-in, hardcoded creds). |
+| `src/judges/run_judges.py` | Runner | CLI that reads scenario.yaml, builds judge context dict, runs all judges, prints verdicts, saves `verdicts.json`. |
+| `src/judges/check.py` | Standalone | Same correctness logic as the judge. CLI: `python src/judges/check.py <scenario-dir> <output-dir>`. |
 
 **Judge context dict** (passed to all judges):
 
@@ -113,10 +113,10 @@ ctx = {
 
 ### Step 1: Prepare source data
 
-Create `evals/sources/<name>/` with:
+Create `src/data-sources/<name>/` with:
 
 ```
-sources/<name>/
+src/data-sources/<name>/
 ├── source.yaml              # Schema declaration
 ├── data/<name>/             # One CSV per source table
 ├── gt/<name>/               # One CSV per expected output model
@@ -173,7 +173,7 @@ expected_models:
   - output_model_b
 ```
 
-**Init script templates** — copy and adapt from `sources/github/`:
+**Init script templates** — copy and adapt from `src/data-sources/github/`:
 
 `postgres_init.sh` pattern:
 ```bash
@@ -230,7 +230,7 @@ if __name__ == "__main__":
 ### Step 2: Create the scenario
 
 ```
-scenarios/<name>/
+src/scenarios/<name>/
 ├── scenario.yaml
 └── SPEC.md
 ```
@@ -264,9 +264,9 @@ judges:
 
 expected_models:
   - name: output_model_a
-    ground_truth: ../../sources/mydata/gt/mydata/output_model_a.csv
+    ground_truth: ../../data-sources/mydata/gt/mydata/output_model_a.csv
   - name: output_model_b
-    ground_truth: ../../sources/mydata/gt/mydata/output_model_b.csv
+    ground_truth: ../../data-sources/mydata/gt/mydata/output_model_b.csv
 ```
 
 **`SPEC.md`** — the task the agent sees. Must include:
@@ -277,45 +277,22 @@ expected_models:
 4. **Deliverable** — code in `stack/`, a `report.md`
 5. **Constraints** — e.g. "everything runs locally", "no Docker"
 
-Use `scenarios/github/SPEC.md` as the reference template.
+Use `src/scenarios/github/SPEC.md` as the reference template.
 
-### Step 3: Update eval.sh
-
-Current `eval.sh` has hardcoded source init calls for the `github` scenario. For a new scenario you need to generalize or add conditionals.
-
-**Option A: Add conditional blocks** (quick)
+### Step 3: Run it
 
 ```bash
-# In the "Setup sources" section of eval.sh:
-if [ -f "sources/$SCENARIO_NAME/postgres_init.sh" ]; then
-  echo "Loading Postgres data..."
-  bash "sources/$SCENARIO_NAME/postgres_init.sh" "$EVALS_DIR/sources/$SCENARIO_NAME"
-fi
-if [ -f "sources/$SCENARIO_NAME/mongo_init.py" ]; then
-  echo "Loading MongoDB data..."
-  python3 "sources/$SCENARIO_NAME/mongo_init.py"
-fi
-if [ -f "sources/$SCENARIO_NAME/s3_init.sh" ]; then
-  echo "Loading S3 data..."
-  bash "sources/$SCENARIO_NAME/s3_init.sh" "$EVALS_DIR/sources/$SCENARIO_NAME"
-fi
-```
-
-**Option B: Read init commands from source.yaml** (better, needs `yq`)
-
-### Step 4: Run it
-
-```bash
-cd evals
-./eval.sh mydata --model claude-sonnet-4-6 --budget 5.00
+src/eval/eval.sh mydata --model claude-sonnet-4-6 --budget 5.00
 ls results/mydata/
 ```
+
+`eval.sh` is generic — it auto-detects init scripts (`postgres_init.sh`, `mongo_init.py`, `s3_init.sh`) in `src/data-sources/<name>/` and runs them if present. No code changes needed.
 
 ## How to add a judge
 
 ### Prompt judge (easiest)
 
-Create `evals/judges/<name>.md`. The framework automatically:
+Create `src/judges/<name>.md`. The framework automatically:
 1. Reads SPEC.md from the agent's workdir
 2. Collects all agent source files (`.py`, `.sql`, `.sh`, `.yaml`, `.yml`, `.toml`, `.md` — up to 3000 lines)
 3. Builds prompt: spec + your rubric + agent code
@@ -359,7 +336,7 @@ Set `pass` to `true` if total >= 12 (60%).
 
 ### Code judge
 
-Create `evals/judges/<name>.py`:
+Create `src/judges/<name>.py`:
 
 ```python
 def judge(ctx: dict) -> dict:
@@ -382,7 +359,7 @@ Add to `judges` list in your scenario.yaml:
 ```yaml
 judges:
   - correctness
-  - my_custom_judge      # resolves to judges/my_custom_judge.md or .py
+  - my_custom_judge      # resolves to src/judges/my_custom_judge.md or .py
 ```
 
 ## Eval output
@@ -470,11 +447,11 @@ uv pip install -e /path/to/ownyourtech-cli  # for development (private repo)
 
 | Task | Command |
 |------|---------|
-| Run an eval | `cd evals && ./eval.sh github --model claude-sonnet-4-6 --budget 5.00` |
-| Run judges on existing output | `python bin/run_judges.py scenarios/github /tmp/workdir results/run sonnet` |
-| Check CSVs against ground truth | `python bin/check.py scenarios/github /path/to/csvs` |
-| Start source services only | `cd evals && docker compose up -d --wait` |
-| Stop source services | `cd evals && docker compose down` |
-| Load data manually | `bash sources/github/postgres_init.sh sources/github` |
+| Run an eval | `src/eval/eval.sh github --model claude-sonnet-4-6 --budget 5.00` |
+| Run judges on existing output | `python src/judges/run_judges.py src/scenarios/github /tmp/workdir results/run sonnet` |
+| Check CSVs against ground truth | `python src/judges/check.py src/scenarios/github /path/to/csvs` |
+| Start source services only | `docker compose -f src/eval/docker-compose.yaml up -d --wait` |
+| Stop source services | `docker compose -f src/eval/docker-compose.yaml down` |
+| Load data manually | `bash src/data-sources/github/postgres_init.sh src/data-sources/github` |
 | View an agent transcript | `cat results/github/*/agent.log` |
 | View judge verdicts | `cat results/github/*/verdicts.json` |

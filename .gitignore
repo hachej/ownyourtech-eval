@@ -1,5 +1,5 @@
-evals/results/
-evals/sources/**/*.zip
+results/
+src/data-sources/**/*.zip
 __pycache__/
 *.pyc
 .env

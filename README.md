@@ -9,7 +9,7 @@ Ported from [ELT-Bench](https://github.com/uiuc-kang-lab/ELT-Bench) — same dat
 ## How it works
 
 ```
-eval.sh <scenario>
+src/eval/eval.sh <scenario>
   │
   ├── 1. Spin up sources (Postgres, MongoDB, S3, REST API)
   ├── 2. Load deterministic data into each source
@@ -42,13 +42,10 @@ pip install oyt
 
 ```bash
 git clone https://github.com/hachej/ownyourtech-eval.git
-cd ownyourtech-eval/evals
+cd ownyourtech-eval
 
-# Start source databases
-docker compose up -d --wait
-
-# Run eval (agent builds pipeline, judges score it)
-./eval.sh github --model claude-sonnet-4-6 --budget 5.00
+# Run eval (starts Docker, loads data, runs agent, scores output)
+src/eval/eval.sh github --model claude-sonnet-4-6 --budget 5.00
 
 # View results
 cat results/github/*/verdicts.json
@@ -57,13 +54,13 @@ cat results/github/*/verdicts.json
 ### Run judges on existing output
 
 ```bash
-python bin/run_judges.py scenarios/github /path/to/agent/workdir results/my-run sonnet
+python src/judges/run_judges.py src/scenarios/github /path/to/agent/workdir results/my-run sonnet
 ```
 
 ### Check ground truth manually
 
 ```bash
-python bin/check.py scenarios/github /path/to/output/csvs
+python src/judges/check.py src/scenarios/github /path/to/output/csvs
 ```
 
 ## The `github` scenario
@@ -95,33 +92,34 @@ The included scenario is a multi-source ELT challenge:
 
 ```
 ownyourtech-eval/
-├── evals/
-│   ├── eval.sh                      # Main eval runner
-│   ├── docker-compose.yaml          # Source databases (Postgres, Mongo, S3, API)
-│   ├── CLAUDE.md                    # Agent instructions (plan → evaluate → execute)
-│   ├── system-prompt.md             # Agent system prompt
-│   ├── bin/
-│   │   ├── check.py                 # Standalone ground truth comparison
-│   │   └── run_judges.py            # Judge runner CLI
+├── src/
+│   ├── eval/
+│   │   ├── eval.sh                  # Main eval runner
+│   │   ├── docker-compose.yaml      # Source databases (Postgres, Mongo, S3, API)
+│   │   ├── CLAUDE.md                # Agent instructions (plan → evaluate → execute)
+│   │   └── system-prompt.md         # Agent system prompt
 │   ├── judges/
 │   │   ├── base.py                  # Judge framework (prompt + code dispatch)
-│   │   ├── correctness.py           # CSV comparison judge
+│   │   ├── correctness.py           # CSV comparison judge (deterministic)
 │   │   ├── code_quality.md          # LLM rubric: structure, errors, readability, docs
 │   │   ├── kg_compliance.md         # LLM rubric: tier 1/2/3 principle checks
+│   │   ├── run_judges.py            # Judge runner CLI
+│   │   ├── check.py                 # Standalone ground truth comparison
 │   │   └── README.md                # How to add judges
 │   ├── scenarios/
 │   │   └── github/
 │   │       ├── scenario.yaml        # Credentials, judges, expected models
 │   │       └── SPEC.md              # Task spec (what the agent sees)
-│   └── sources/
+│   └── data-sources/
 │       └── github/
 │           ├── source.yaml          # Source schema declaration
-│           ├── data/github/         # 14 source CSVs (~200KB total)
-│           ├── gt/github/           # 6 ground truth CSVs
 │           ├── postgres_init.sh     # Loads tables into Postgres
 │           ├── mongo_init.py        # Loads collections into MongoDB
 │           ├── s3_init.sh           # Uploads files to LocalStack S3
-│           └── api_server.py        # Flask REST API serving 3 endpoints
+│           ├── api_server.py        # Flask REST API (3 endpoints)
+│           ├── data/github/         # 14 source CSVs (~200KB)
+│           └── gt/github/           # 6 ground truth CSVs
+├── results/                         # (gitignored) eval run outputs
 ├── AGENTS.md                        # LLM contributor guide
 ├── README.md
 └── LICENSE
@@ -131,19 +129,19 @@ ownyourtech-eval/
 
 See [AGENTS.md](AGENTS.md) for the full step-by-step guide. In short:
 
-1. Add source data and init scripts to `evals/sources/<name>/`
-2. Create `evals/scenarios/<name>/scenario.yaml` (credentials, judges, expected models)
-3. Write `evals/scenarios/<name>/SPEC.md` (the task the agent sees)
-4. Add ground truth CSVs
-5. Run `./evals/eval.sh <name>`
+1. Add source data and init scripts to `src/data-sources/<name>/`
+2. Create `src/scenarios/<name>/scenario.yaml` (credentials, judges, expected models)
+3. Write `src/scenarios/<name>/SPEC.md` (the task the agent sees)
+4. Add ground truth CSVs to `src/data-sources/<name>/gt/<name>/`
+5. Run `src/eval/eval.sh <name>`
 
 ## Adding a judge
 
-**Prompt judge** — create `evals/judges/<name>.md` with a rubric ending in a JSON template. The framework injects the agent's code and spec automatically.
+**Prompt judge** — create `src/judges/<name>.md` with a rubric ending in a JSON template. The framework injects the agent's code and spec automatically.
 
-**Code judge** — create `evals/judges/<name>.py` with `def judge(ctx: dict) -> dict`.
+**Code judge** — create `src/judges/<name>.py` with `def judge(ctx: dict) -> dict`.
 
-See [evals/judges/README.md](evals/judges/README.md) for details.
+See [src/judges/README.md](src/judges/README.md) for details.
 
 ## The `oyt` CLI and Knowledge Base
 
@@ -155,15 +153,13 @@ oyt kg get principles/tier-1-core        # Read core principles
 oyt kg evaluate "Use Snowflake"          # Check if a tech choice is approved
 ```
 
-The knowledge base itself lives in the private [ownyourtech-cli](https://github.com/hachej/ownyourtech-cli) repo and is accessed through the `oyt` binary. Install it:
+The knowledge base lives in the private [ownyourtech-cli](https://github.com/hachej/ownyourtech-cli) repo. Install the CLI:
 
 ```bash
 pip install oyt                          # from PyPI
 # or
 uv pip install -e /path/to/ownyourtech-cli  # for local development
 ```
-
-The eval runner sets `OYT_KB_PATH` automatically so the agent can access the KB.
 
 ## License
 

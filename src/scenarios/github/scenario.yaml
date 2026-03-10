@@ -33,14 +33,14 @@ judges:
 
 expected_models:
   - name: github__issues
-    ground_truth: ../../sources/github/gt/github/github__issues.csv
+    ground_truth: ../../data-sources/github/gt/github/github__issues.csv
   - name: github__pull_requests
-    ground_truth: ../../sources/github/gt/github/github__pull_requests.csv
+    ground_truth: ../../data-sources/github/gt/github/github__pull_requests.csv
   - name: github__daily_metrics
-    ground_truth: ../../sources/github/gt/github/github__daily_metrics.csv
+    ground_truth: ../../data-sources/github/gt/github/github__daily_metrics.csv
   - name: github__weekly_metrics
-    ground_truth: ../../sources/github/gt/github/github__weekly_metrics.csv
+    ground_truth: ../../data-sources/github/gt/github/github__weekly_metrics.csv
   - name: github__monthly_metrics
-    ground_truth: ../../sources/github/gt/github/github__monthly_metrics.csv
+    ground_truth: ../../data-sources/github/gt/github/github__monthly_metrics.csv
   - name: github__quarterly_metrics
-    ground_truth: ../../sources/github/gt/github/github__quarterly_metrics.csv
+    ground_truth: ../../data-sources/github/gt/github/github__quarterly_metrics.csv

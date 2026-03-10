@@ -125,7 +125,7 @@ The `correctness.py` judge is the primary deterministic check:
 
 ```bash
 # Run standalone check
-python bin/check.py scenarios/github /path/to/agent/workdir/_judge_output
+python src/judges/check.py src/scenarios/github /path/to/agent/workdir/_judge_output
 
 # Or export manually and inspect
 duckdb /path/to/agent/warehouse.duckdb -csv "SELECT * FROM github__issues ORDER BY 1,2 LIMIT 5;"
