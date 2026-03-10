@@ -1,15 +1,12 @@
 """Ground truth CSV comparison judge.
 
 Compares agent output against expected CSVs — pass/fail per model per column.
-This is the existing check.py logic wrapped as a judge module.
 """
 
 import csv
 import math
 import subprocess
 from pathlib import Path
-
-import yaml
 
 
 def load_csv(path):
