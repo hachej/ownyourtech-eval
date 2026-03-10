@@ -160,7 +160,7 @@ uv pip install -e /path/to/ownyourtech-cli  # for local development
 
 ## Contributors
 
-- [Timo Dechau](https://github.com/hachej)
+- [Timo Dechau](https://github.com/deepskydata)
 
 ## License
 
