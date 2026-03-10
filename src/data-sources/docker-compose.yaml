@@ -38,7 +38,7 @@ services:
       - mongodb_data:/data/db
 
   eval-localstack:
-    image: localstack/localstack:latest
+    image: localstack/localstack:4.1
     container_name: eval-localstack
     environment:
       - SERVICES=s3
@@ -55,12 +55,18 @@ services:
     container_name: eval-api
     working_dir: /app
     volumes:
-      - ./sources/github:/app:ro
-    command: sh -c "pip install flask && python api_server.py"
+      - ./github:/app:ro
+    command: sh -c "pip install -q flask && python api_server.py"
     ports:
       - "5055:5055"
     networks:
       - eval_network
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:5055/github/repository\")'"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
 
 volumes:
   postgres_data:

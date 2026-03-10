@@ -71,7 +71,7 @@ fi
 echo "Copying flat files..."
 if [ -d "$SOURCES_DIR/$SCENARIO_NAME/data/$SCENARIO_NAME" ]; then
   mkdir -p "$WORKDIR/data/$SCENARIO_NAME"
-  # Copy only flat files referenced in source.yaml (csv, jsonl)
+  # Copy flat files (csv, jsonl)
   for f in "$SOURCES_DIR/$SCENARIO_NAME/data/$SCENARIO_NAME"/*.csv "$SOURCES_DIR/$SCENARIO_NAME/data/$SCENARIO_NAME"/*.jsonl; do
     [ -f "$f" ] && cp "$f" "$WORKDIR/data/$SCENARIO_NAME/"
   done

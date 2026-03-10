@@ -29,7 +29,7 @@ src/eval/eval.sh <scenario-name> [--model <model>] [--budget <usd>]
   │                   └── data/      (flat files)
   │
   ├── run agent ─── claude -p --model <model> --max-budget-usd <budget>
-  │            ├── OYT_KB_PATH set so agent can use `oyt kg evaluate`
+  │            ├── OYT_KB_PATH forwarded so agent can use `oyt kg evaluate`
   │            └── output: agent.jsonl, agent.log
   │
   └── run judges ─── correctness.py  (CSV diff vs ground truth)
@@ -392,7 +392,7 @@ pip install oyt                          # from PyPI (public)
 uv pip install -e /path/to/ownyourtech-cli  # for development (private repo)
 ```
 
-`eval.sh` sets `OYT_KB_PATH` to point to the KB root so the agent can resolve it.
+`eval.sh` forwards `OYT_KB_PATH` from the environment so the agent can resolve the KB. Set it before running if the KB is in a non-default location.
 
 ## Common tasks
 

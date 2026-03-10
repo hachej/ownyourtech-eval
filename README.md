@@ -27,7 +27,10 @@ src/eval/eval.sh <scenario>
 
 - Docker (for source databases)
 - [Claude Code](https://claude.com/claude-code) CLI (for running agents and LLM judges)
-- Python 3.10+ with `pyyaml`, `pymongo`, `flask`
+- Python 3.10+ with `pyyaml`, `pymongo`
+- [`yq`](https://github.com/mikefarah/yq) (YAML processor, used by eval.sh)
+- [`duckdb`](https://duckdb.org/) CLI (correctness judge exports from agent's database)
+- AWS CLI (for LocalStack S3 init)
 - [`oyt` CLI](https://pypi.org/project/oyt/) — the agent uses this to consult the knowledge base
 
 ```bash
