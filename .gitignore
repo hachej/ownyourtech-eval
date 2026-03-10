@@ -1,4 +1,5 @@
-oyt-eval
-*.exe
 evals/results/
-evals/sources/github/*.zip
+evals/sources/**/*.zip
+__pycache__/
+*.pyc
+.env
