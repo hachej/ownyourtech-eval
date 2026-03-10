@@ -4,7 +4,7 @@ Open-source evaluation framework for data engineering agents.
 
 Tests whether an AI agent can build a **correct ELT pipeline** from a spec while following **EU-sovereign, open-source, local-first** technology principles.
 
-Ported from [ELT-Bench](https://github.com/uiuc-kang-lab/ELT-Bench) — same data, same ground truth, extensible framework.
+Inspired by the [ELT-Bench paper](https://arxiv.org/abs/2501.12206) ([code](https://github.com/uiuc-kang-lab/ELT-Bench)) — same data, same ground truth, extensible framework.
 
 ## How it works
 
@@ -54,7 +54,7 @@ cat results/github/*/verdicts.json
 ### Run judges on existing output
 
 ```bash
-python src/judges/run_judges.py src/scenarios/github /path/to/agent/workdir results/my-run sonnet
+python src/judges/base.py src/scenarios/github /path/to/agent/workdir results/my-run sonnet
 ```
 
 ### Check ground truth manually
@@ -95,14 +95,12 @@ ownyourtech-eval/
 ├── src/
 │   ├── eval/
 │   │   ├── eval.sh                  # Main eval runner
-│   │   ├── CLAUDE.md                # Agent instructions (plan → evaluate → execute)
-│   │   └── system-prompt.md         # Agent system prompt
+│   │   └── CLAUDE.md                # Agent instructions (plan → evaluate → execute)
 │   ├── judges/
-│   │   ├── base.py                  # Judge framework (prompt + code dispatch)
+│   │   ├── base.py                  # Judge framework + CLI runner
 │   │   ├── correctness.py           # CSV comparison judge (deterministic)
 │   │   ├── code_quality.md          # LLM rubric: structure, errors, readability, docs
 │   │   ├── kg_compliance.md         # LLM rubric: tier 1/2/3 principle checks
-│   │   ├── run_judges.py            # Judge runner CLI
 │   │   ├── check.py                 # Standalone ground truth comparison
 │   │   └── README.md                # How to add judges
 │   ├── scenarios/
@@ -112,7 +110,6 @@ ownyourtech-eval/
 │   └── data-sources/
 │       ├── docker-compose.yaml      # Source databases (Postgres, Mongo, S3, API)
 │       └── github/
-│           ├── source.yaml          # Source schema declaration
 │           ├── postgres_init.sh     # Loads tables into Postgres
 │           ├── mongo_init.py        # Loads collections into MongoDB
 │           ├── s3_init.sh           # Uploads files to LocalStack S3
@@ -160,6 +157,10 @@ pip install oyt                          # from PyPI
 # or
 uv pip install -e /path/to/ownyourtech-cli  # for local development
 ```
+
+## Contributors
+
+- [Timo Dechau](https://github.com/hachej)
 
 ## License
 

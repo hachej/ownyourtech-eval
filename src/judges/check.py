@@ -1,59 +1,17 @@
-"""ELT-Bench style ground truth comparison.
-
-Compares agent output against expected CSVs.
-Reports pass/fail per model, per column.
+"""Standalone ground truth comparison.
 
 Usage:
-    python check.py <scenario-dir> <output-db-or-dir>
+    python check.py <scenario-dir> <output-dir>
+
+output-dir should contain CSVs named <model>.csv
 """
 
-import csv
-import math
 import sys
 from pathlib import Path
 
 import yaml
 
-
-def load_csv(path):
-    with open(path) as f:
-        reader = csv.DictReader(f)
-        return list(reader), reader.fieldnames
-
-
-def vectors_match(v1, v2, tol=1e-2):
-    """ELT-Bench comparison logic: values match within tolerance."""
-    if len(v1) != len(v2):
-        return False, f"row count mismatch: expected {len(v1)}, got {len(v2)}"
-
-    mismatches = 0
-    for i, (a, b) in enumerate(zip(v1, v2)):
-        # Both null
-        if (a is None or a == "") and (b is None or b == ""):
-            continue
-
-        # One null, other not
-        if (a is None or a == "") != (b is None or b == ""):
-            mismatches += 1
-            continue
-
-        # Try numeric comparison
-        try:
-            fa, fb = float(a), float(b)
-            if math.isnan(fa) and math.isnan(fb):
-                continue
-            if fa != 0 and abs(fb - fa) / abs(fa) > tol:
-                mismatches += 1
-            elif fa == 0 and fb != 0:
-                mismatches += 1
-        except (ValueError, TypeError):
-            # String comparison
-            if str(a).strip() != str(b).strip():
-                mismatches += 1
-
-    if mismatches > 0:
-        return False, f"{mismatches}/{len(v1)} values differ"
-    return True, "ok"
+from correctness import load_csv, vectors_match
 
 
 def check_model(model_name, gt_path, output_path):
@@ -70,7 +28,6 @@ def check_model(model_name, gt_path, output_path):
     if not gt_cols:
         return False, {"error": "ground truth has no columns"}
 
-    # Build case-insensitive lookup for output columns
     out_col_map = {c.upper(): c for c in out_cols} if out_cols else {}
 
     matched = []
@@ -111,8 +68,7 @@ def main():
     scenario_dir = Path(sys.argv[1])
     output_dir = Path(sys.argv[2])
 
-    scenario_file = scenario_dir / "scenario.yaml"
-    with open(scenario_file) as f:
+    with open(scenario_dir / "scenario.yaml") as f:
         scenario = yaml.safe_load(f)
 
     models = scenario.get("expected_models", [])

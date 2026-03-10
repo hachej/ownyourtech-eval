@@ -162,7 +162,7 @@ echo ""
 
 # --- Step 5: Run judges ---
 echo "--- Running judges ---"
-python3 "$SRC_DIR/judges/run_judges.py" \
+python3 "$SRC_DIR/judges/base.py" \
   "$SCENARIO_DIR" "$WORKDIR" "$RESULTS_DIR" "$MODEL" \
   | tee "$RESULTS_DIR/judges.log" || true
 

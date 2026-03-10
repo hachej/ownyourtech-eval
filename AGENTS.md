@@ -47,7 +47,6 @@ src/eval/eval.sh <scenario-name> [--model <model>] [--budget <usd>]
 | `src/eval/eval.sh` | Orchestrator. Parses flags, starts Docker, loads data, creates workdir, runs agent, runs judges, writes metadata. Generic — auto-detects init scripts per scenario. |
 | `src/data-sources/docker-compose.yaml` | 4 services: `eval-postgres` (:5433), `eval-mongodb` (:27017), `eval-localstack` (:4566), `eval-api` (:5055). |
 | `src/eval/CLAUDE.md` | Injected into agent context. Tells agent: plan first, evaluate tech with `oyt kg evaluate`, then execute. Two-phase workflow. |
-| `src/eval/system-prompt.md` | Alternative system prompt. Describes mandatory workflow and output structure (`stack/` + `report.md`). |
 
 ### Data sources
 
@@ -55,7 +54,6 @@ A "source" is a dataset loaded into Docker services. Each source has init script
 
 | File | What it does |
 |------|-------------|
-| `src/data-sources/github/source.yaml` | Declares 14 tables across 5 source types: postgres (4), mongodb (4), rest_api (3), s3 (1), flat_files (2). |
 | `src/data-sources/github/postgres_init.sh` | Creates `github` database. Creates tables: `issue`, `issue_closed_history`, `pull_request`, `users`. Loads via `\COPY` from CSVs. Takes data dir as `$1`. |
 | `src/data-sources/github/mongo_init.py` | Drops+recreates `github` db. Loads 4 collections: `issue_comment`, `label`, `pull_request_review`, `team`. Reads `MONGO_URI` from env. |
 | `src/data-sources/github/s3_init.sh` | Creates `github-bucket` in LocalStack, uploads `repo_team.jsonl`. Uses `aws` CLI with `--endpoint-url`. |
@@ -63,7 +61,7 @@ A "source" is a dataset loaded into Docker services. Each source has init script
 | `src/data-sources/github/data/github/*.csv` | 14 source CSV files (~200KB total). Committed to git. |
 | `src/data-sources/github/gt/github/*.csv` | 6 ground truth CSVs. Column names must match exactly (case-insensitive). Rows sorted by first two columns. |
 
-**To understand the source data**, read `source.yaml` for the schema overview, then look at the CSV headers for exact column names.
+**To understand the source data**, look at the CSV headers for exact column names and the init scripts for how data is loaded.
 
 ### Scenarios
 
@@ -88,12 +86,11 @@ Prompt judges take priority: if both `foo.md` and `foo.py` exist, the `.md` wins
 
 | File | Type | What it checks |
 |------|------|---------------|
-| `src/judges/base.py` | Framework | Resolves judges by name (`<name>.md` or `<name>.py`). `run_prompt_judge()` sends rubric + agent code to Claude. `run_code_judge()` imports and calls `judge()`. `collect_source_files()` gathers agent's code (up to 3000 lines). `parse_json_from_text()` extracts JSON from LLM output. |
+| `src/judges/base.py` | Framework + CLI | Resolves judges by name (`<name>.md` or `<name>.py`). `run_prompt_judge()` sends rubric + agent code to Claude. `run_code_judge()` imports and calls `judge()`. Also the CLI entry point: `python base.py <scenario-dir> <workdir> <results-dir> <model>`. |
 | `src/judges/correctness.py` | Code | Finds agent's database files (DuckDB `.duckdb` or SQLite `.db`/`.sqlite`). Exports each expected model to CSV via CLI. Compares column-by-column against ground truth. Numeric tolerance: 1%. Case-insensitive column matching. |
 | `src/judges/code_quality.md` | Prompt | Scores 4 dimensions (0-10 each): structure & modularity, error handling, readability, documentation. Pass threshold: 24/40 (60%). |
 | `src/judges/kg_compliance.md` | Prompt | Checks Tier 1 violations (auto-fail), Tier 2 deviations (should be justified), Tier 3 preferences, anti-patterns (over-engineering, vendor lock-in, hardcoded creds). |
-| `src/judges/run_judges.py` | Runner | CLI that reads scenario.yaml, builds judge context dict, runs all judges, prints verdicts, saves `verdicts.json`. |
-| `src/judges/check.py` | Standalone | Same correctness logic as the judge. CLI: `python src/judges/check.py <scenario-dir> <output-dir>`. |
+| `src/judges/check.py` | Standalone | Imports comparison logic from `correctness.py`. CLI: `python check.py <scenario-dir> <output-dir>`. |
 
 **Judge context dict** (passed to all judges):
 
@@ -117,7 +114,6 @@ Create `src/data-sources/<name>/` with:
 
 ```
 src/data-sources/<name>/
-├── source.yaml              # Schema declaration
 ├── data/<name>/             # One CSV per source table
 ├── gt/<name>/               # One CSV per expected output model
 ├── postgres_init.sh         # Optional: load tables into Postgres
@@ -127,51 +123,6 @@ src/data-sources/<name>/
 ```
 
 Only create init scripts for the source types your scenario uses. A Postgres-only scenario doesn't need mongo_init.py.
-
-**`source.yaml` format** — declare which tables live where:
-
-```yaml
-name: mydata
-description: Short description
-
-postgres:
-  host: eval-postgres          # Docker service name
-  port: 5432                   # Internal Docker port
-  database: mydata
-  user: postgres
-  password: testelt
-  tables:
-    - customers
-    - orders
-
-# Only include sections for source types you actually use:
-# mongodb:
-#   host: eval-mongodb
-#   port: 27017
-#   database: mydata
-#   tables:
-#     - events
-
-# rest_api:
-#   host: eval-api
-#   port: 5005
-#   tables:
-#     - products
-
-# s3:
-#   endpoint: http://eval-localstack:4566
-#   bucket: mydata-bucket
-#   tables:
-#     - logs    # stored as logs.jsonl
-
-# flat_files:
-#   tables:
-#     - config_data
-
-expected_models:
-  - output_model_a
-  - output_model_b
-```
 
 **Init script templates** — copy and adapt from `src/data-sources/github/`:
 
@@ -448,7 +399,7 @@ uv pip install -e /path/to/ownyourtech-cli  # for development (private repo)
 | Task | Command |
 |------|---------|
 | Run an eval | `src/eval/eval.sh github --model claude-sonnet-4-6 --budget 5.00` |
-| Run judges on existing output | `python src/judges/run_judges.py src/scenarios/github /tmp/workdir results/run sonnet` |
+| Run judges on existing output | `python src/judges/base.py src/scenarios/github /tmp/workdir results/run sonnet` |
 | Check CSVs against ground truth | `python src/judges/check.py src/scenarios/github /path/to/csvs` |
 | Start source services only | `docker compose -f src/data-sources/docker-compose.yaml up -d --wait` |
 | Stop source services | `docker compose -f src/data-sources/docker-compose.yaml down` |
