@@ -1,0 +1,72 @@
+services:
+  eval-postgres:
+    image: postgres:16
+    container_name: eval-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: testelt
+      POSTGRES_DB: mydb
+    ports:
+      - "5433:5432"
+    networks:
+      - eval_network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+
+  eval-mongodb:
+    image: mongo:8.0
+    container_name: eval-mongodb
+    command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
+    ports:
+      - "27017:27017"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'host.docker.internal:27017'}]}) }" | mongosh --port 27017 --quiet
+      interval: 5s
+      timeout: 30s
+      start_period: 0s
+      retries: 30
+    networks:
+      - eval_network
+    volumes:
+      - mongodb_data:/data/db
+
+  eval-localstack:
+    image: localstack/localstack:latest
+    container_name: eval-localstack
+    environment:
+      - SERVICES=s3
+      - DEBUG=0
+    ports:
+      - "4566:4566"
+    networks:
+      - eval_network
+    volumes:
+      - localstack_data:/var/lib/localstack
+
+  eval-api:
+    image: python:3.11-slim
+    container_name: eval-api
+    working_dir: /app
+    volumes:
+      - ./sources/github:/app:ro
+    command: sh -c "pip install flask && python api_server.py"
+    ports:
+      - "5055:5055"
+    networks:
+      - eval_network
+
+volumes:
+  postgres_data:
+  mongodb_data:
+  localstack_data:
+
+networks:
+  eval_network:
+    driver: bridge

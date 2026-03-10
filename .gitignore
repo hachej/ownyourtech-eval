@@ -1,2 +1,4 @@
 oyt-eval
 *.exe
+evals/results/
+evals/sources/github/*.zip

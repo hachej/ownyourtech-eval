@@ -1,0 +1,46 @@
+# Scenario: GitHub (ported from ELT-Bench)
+# Agent builds an ELT pipeline that extracts from multi-source GitHub data
+# and produces 6 analytics models.
+
+name: github
+description: >
+  Extract GitHub data from Postgres, MongoDB, REST API, S3, and flat files.
+  Transform into analytics models: issues, pull requests, and time-aggregated metrics.
+
+spec: SPEC.md
+
+source: github
+
+credentials:
+  - PG_HOST=localhost
+  - PG_PORT=5433
+  - PG_USER=postgres
+  - PG_PASSWORD=testelt
+  - PG_DATABASE=github
+  - MONGO_URI=mongodb://localhost:27017/?directConnection=true
+  - MONGO_DATABASE=github
+  - API_BASE_URL=http://localhost:5055
+  - AWS_ACCESS_KEY_ID=test
+  - AWS_SECRET_ACCESS_KEY=test
+  - AWS_DEFAULT_REGION=us-west-2
+  - AWS_ENDPOINT_URL=http://localhost:4566
+  - S3_BUCKET=github-bucket
+
+judges:
+  - correctness
+  - code_quality
+  # - kg_compliance
+
+expected_models:
+  - name: github__issues
+    ground_truth: ../../sources/github/gt/github/github__issues.csv
+  - name: github__pull_requests
+    ground_truth: ../../sources/github/gt/github/github__pull_requests.csv
+  - name: github__daily_metrics
+    ground_truth: ../../sources/github/gt/github/github__daily_metrics.csv
+  - name: github__weekly_metrics
+    ground_truth: ../../sources/github/gt/github/github__weekly_metrics.csv
+  - name: github__monthly_metrics
+    ground_truth: ../../sources/github/gt/github/github__monthly_metrics.csv
+  - name: github__quarterly_metrics
+    ground_truth: ../../sources/github/gt/github/github__quarterly_metrics.csv

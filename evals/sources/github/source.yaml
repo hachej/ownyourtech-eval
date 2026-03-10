@@ -1,0 +1,54 @@
+# GitHub source data — ported from ELT-Bench
+# 14 source tables across 5 source types
+
+name: github
+description: GitHub issues, PRs, users, reviews, teams — multi-source
+
+postgres:
+  host: eval-postgres
+  port: 5432
+  database: github
+  user: postgres
+  password: testelt
+  tables:
+    - issue
+    - issue_closed_history
+    - pull_request
+    - users
+
+mongodb:
+  host: eval-mongodb
+  port: 27017
+  database: github
+  tables:
+    - issue_comment
+    - label
+    - pull_request_review
+    - team
+
+rest_api:
+  host: eval-api
+  port: 5005
+  tables:
+    - issue_assignee
+    - issue_merged
+    - repository
+
+s3:
+  endpoint: http://eval-localstack:4566
+  bucket: github-bucket
+  tables:
+    - repo_team        # repo_team.jsonl
+
+flat_files:
+  tables:
+    - requested_reviewer_history
+    - issue_label
+
+expected_models:
+  - github__issues
+  - github__pull_requests
+  - github__daily_metrics
+  - github__weekly_metrics
+  - github__monthly_metrics
+  - github__quarterly_metrics

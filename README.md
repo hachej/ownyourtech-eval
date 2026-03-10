@@ -1,12 +1,56 @@
 # ownyourtech-eval
 
-Evaluate technology proposals against an opinionated knowledge base for **EU-sovereign, open-source, local-first data stacks**.
+Open-source evaluation framework for **EU-sovereign, open-source, local-first data stacks**.
 
-This is the open-source evaluation engine behind [`oyt kg evaluate`](https://github.com/hachej/ownyourtech-cli). Use it to check whether a proposed technology stack aligns with the OwnYourTech principles — or fork the KB and encode your own.
+Two things in one repo:
+
+1. **Knowledge Base + Evaluator** — check if a technology proposal aligns with OwnYourTech principles (`oyt kg evaluate`)
+2. **Agent Eval Framework** — give an AI agent a spec, measure whether it builds a correct ELT pipeline following those principles
+
+Ported from [ELT-Bench](https://github.com/uiuc-kang-lab/ELT-Bench) — same data, same ground truth, extensible framework.
+
+## Quick start
+
+### 1. Stack evaluator
+
+Check technology proposals against the knowledge base:
+
+```bash
+git clone https://github.com/hachej/ownyourtech-eval.git
+cd ownyourtech-eval
+
+make test    # run Go tests
+make build   # build the CLI
+
+./oyt-eval "Use Snowflake for the data warehouse"
+# → REJECTED (exit code 2)
+
+./oyt-eval "Deploy dlt + DuckDB on Hetzner"
+# → Approved (exit code 0)
+```
+
+### 2. Agent eval
+
+Run an AI agent against a scenario and score the output:
+
+```bash
+cd evals
+
+# Start source databases (Postgres, MongoDB, S3, REST API)
+docker compose up -d --wait
+
+# Run the eval
+./eval.sh github --model claude-sonnet-4-6 --budget 5.00
+
+# Check results
+ls results/github/
+```
 
 ## How it works
 
-The evaluator matches proposal text against a catalog of data tools, each with a recommendation level:
+### Stack evaluator
+
+Matches proposal text against a catalog of data tools with recommendation levels:
 
 | Level | Meaning | Effect |
 |-------|---------|--------|
@@ -20,59 +64,54 @@ Core principles (Tier 1) are non-negotiable:
 - **Self-hosted & open source** — no proprietary SaaS for core infrastructure
 - **Local-first** — don't distribute what doesn't need distributing
 
-## Quick start
+### Agent eval
 
-```bash
-git clone https://github.com/hachej/ownyourtech-eval.git
-cd ownyourtech-eval
+1. **Sources** spin up (Postgres, MongoDB, S3, REST API) with deterministic data
+2. **Agent** reads SPEC.md in an isolated workdir and builds the pipeline
+3. **Judges** score the output:
+   - `correctness` — compares agent output CSVs against ground truth (pass/fail per model, per column)
+   - `code_quality` — LLM judge scores structure, error handling, readability, documentation
+   - `kg_compliance` — LLM judge checks tier 1/2/3 principle adherence
 
-# Run tests
-make test
+## Repository structure
 
-# Build and try it
-make build
-./oyt-eval "Use Snowflake for the data warehouse"
-# → REJECTED (exit code 2)
-
-./oyt-eval "Deploy dlt + DuckDB on Hetzner"
-# → Approved (exit code 0)
+```
+ownyourtech-eval/
+├── kg/                          # Knowledge base (principles, catalog, patterns)
+├── eval/                        # Go eval library
+│   ├── eval.go
+│   └── eval_test.go
+├── cmd/oyt-eval/                # Standalone CLI
+├── testcases/                   # Example proposals with expected outcomes
+├── evals/                       # Agent eval framework
+│   ├── eval.sh                  # Main runner
+│   ├── docker-compose.yaml      # Source databases
+│   ├── CLAUDE.md                # Agent instructions
+│   ├── system-prompt.md         # System prompt
+│   ├── bin/
+│   │   ├── check.py             # Ground truth comparison
+│   │   └── run_judges.py        # Judge runner
+│   ├── judges/
+│   │   ├── base.py              # Judge framework (prompt + code judges)
+│   │   ├── correctness.py       # CSV comparison judge
+│   │   ├── code_quality.md      # LLM rubric for code quality
+│   │   └── kg_compliance.md     # LLM rubric for KB compliance
+│   ├── scenarios/github/
+│   │   ├── scenario.yaml        # Sources, credentials, expected models
+│   │   └── SPEC.md              # What the agent sees
+│   └── sources/github/
+│       ├── data/github/         # Source CSVs (14 tables)
+│       ├── gt/github/           # Ground truth CSVs (6 models)
+│       ├── postgres_init.sh     # Loads tables into Postgres
+│       ├── mongo_init.py        # Loads tables into MongoDB
+│       ├── s3_init.sh           # Loads table into S3
+│       └── api_server.py        # Serves tables via REST
+├── go.mod
+├── Makefile
+└── README.md
 ```
 
-## Usage
-
-```bash
-# Evaluate a proposal (finds kg/ automatically)
-./oyt-eval "Use dlt for ingestion and DuckDB for analytics"
-
-# Point to a custom KB
-OYT_KB_PATH=/path/to/your/kg ./oyt-eval "Use Fivetran"
-
-# Run all examples
-make run-examples
-```
-
-### Output
-
-```json
-{
-  "approved": false,
-  "tier": 1,
-  "conflicts": [
-    {
-      "tier": 1,
-      "source": "catalog/storage",
-      "message": "Snowflake: Rejected. Proprietary, US company, vendor lock-in on storage format. Violates Tier 1.",
-      "alternatives": ["DuckDB", "PostgreSQL"]
-    }
-  ],
-  "recommendation": "REJECTED (Tier 1 violation). Snowflake: Rejected. ... Use instead: DuckDB, PostgreSQL.",
-  "matched_items": [...]
-}
-```
-
-Exit codes: `0` = approved, `2` = rejected.
-
-## As a Go library
+## Go library
 
 ```go
 import "github.com/hachej/ownyourtech-eval/eval"
@@ -87,32 +126,21 @@ if !result.Approved {
 }
 ```
 
-## The Knowledge Base
+## Adding a scenario
 
-The `kg/` directory contains the full evaluation corpus:
+1. Add source data under `evals/sources/<name>/`
+2. Create `evals/scenarios/<name>/scenario.yaml` with credentials and expected models
+3. Write `SPEC.md` — the agent's prompt
+4. Add ground truth CSVs
+5. Run `./evals/eval.sh <name>`
 
-```
-kg/
-├── principles/          # Tiered constraints (non-negotiable → preferences)
-│   ├── tier-1-core.md       # EU sovereignty, open source, local-first
-│   ├── tier-2-defaults.md   # Hetzner, dlt, DuckDB, dbt-core, cron
-│   └── tier-3-preferences.md # Monorepo, naming, Parquet
-├── catalog/             # Solution recommendations by category
-│   ├── ingestion.md         # dlt, Airbyte, Fivetran, Meltano...
-│   ├── storage.md           # DuckDB, PostgreSQL, Snowflake, S3...
-│   ├── transformation.md   # dbt-core, dbt Cloud, SQLMesh...
-│   ├── orchestration.md    # Cron, Dagster, Airflow...
-│   ├── compute.md          # Hetzner, OVH, AWS, GCP, Azure...
-│   └── collection.md       # Buz, Snowplow, Segment, GA...
-├── patterns/            # Reference architectures
-│   ├── early-stage-stack.md
-│   ├── growth-stage-stack.md
-│   ├── data-modeling.md
-│   └── project-structure.md
-└── anti-patterns/       # What to avoid
-    ├── over-engineering.md
-    └── vendor-traps.md
-```
+## Adding a judge
+
+**Prompt judge** — create `evals/judges/<name>.md` with a rubric. The runner injects agent source code and spec automatically.
+
+**Code judge** — create `evals/judges/<name>.py` with a `judge(ctx) -> dict` function.
+
+See `evals/judges/README.md` for details.
 
 ## Fork & customize
 
@@ -125,11 +153,12 @@ The KB is just markdown. Fork this repo and edit the catalog tables to encode yo
 | **BadTool** | Reject | Why it violates your principles |
 ```
 
-The evaluator parses markdown tables with a `Recommendation` column and matches solution names against proposal text.
+## Prerequisites
 
-## Test cases
-
-`testcases/proposals.json` contains example proposals with expected outcomes. Use it to validate your KB modifications or to understand the evaluation logic.
+- Go 1.22+ (for the eval library)
+- Docker (for agent eval sources)
+- [Claude Code](https://claude.com/claude-code) CLI (for running agents)
+- Python 3.10+ with `pyyaml`, `pymongo`, `flask` (for source setup and judges)
 
 ## License
 
