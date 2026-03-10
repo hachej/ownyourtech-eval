@@ -45,7 +45,7 @@ echo ""
 # --- Step 1: Setup sources ---
 echo "--- Setting up sources ---"
 cd "$EVAL_DIR"
-docker compose -f "$EVAL_DIR/docker-compose.yaml" up -d --wait 2>&1 | tail -5
+docker compose -f "$SRC_DIR/data-sources/docker-compose.yaml" up -d --wait 2>&1 | tail -5
 
 SOURCES_DIR="$SRC_DIR/data-sources"
 

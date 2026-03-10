@@ -95,7 +95,6 @@ ownyourtech-eval/
 ├── src/
 │   ├── eval/
 │   │   ├── eval.sh                  # Main eval runner
-│   │   ├── docker-compose.yaml      # Source databases (Postgres, Mongo, S3, API)
 │   │   ├── CLAUDE.md                # Agent instructions (plan → evaluate → execute)
 │   │   └── system-prompt.md         # Agent system prompt
 │   ├── judges/
@@ -111,6 +110,7 @@ ownyourtech-eval/
 │   │       ├── scenario.yaml        # Credentials, judges, expected models
 │   │       └── SPEC.md              # Task spec (what the agent sees)
 │   └── data-sources/
+│       ├── docker-compose.yaml      # Source databases (Postgres, Mongo, S3, API)
 │       └── github/
 │           ├── source.yaml          # Source schema declaration
 │           ├── postgres_init.sh     # Loads tables into Postgres

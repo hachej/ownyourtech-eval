@@ -45,7 +45,7 @@ src/eval/eval.sh <scenario-name> [--model <model>] [--budget <usd>]
 | File | What it does |
 |------|-------------|
 | `src/eval/eval.sh` | Orchestrator. Parses flags, starts Docker, loads data, creates workdir, runs agent, runs judges, writes metadata. Generic — auto-detects init scripts per scenario. |
-| `src/eval/docker-compose.yaml` | 4 services: `eval-postgres` (:5433), `eval-mongodb` (:27017), `eval-localstack` (:4566), `eval-api` (:5055). |
+| `src/data-sources/docker-compose.yaml` | 4 services: `eval-postgres` (:5433), `eval-mongodb` (:27017), `eval-localstack` (:4566), `eval-api` (:5055). |
 | `src/eval/CLAUDE.md` | Injected into agent context. Tells agent: plan first, evaluate tech with `oyt kg evaluate`, then execute. Two-phase workflow. |
 | `src/eval/system-prompt.md` | Alternative system prompt. Describes mandatory workflow and output structure (`stack/` + `report.md`). |
 
@@ -450,8 +450,8 @@ uv pip install -e /path/to/ownyourtech-cli  # for development (private repo)
 | Run an eval | `src/eval/eval.sh github --model claude-sonnet-4-6 --budget 5.00` |
 | Run judges on existing output | `python src/judges/run_judges.py src/scenarios/github /tmp/workdir results/run sonnet` |
 | Check CSVs against ground truth | `python src/judges/check.py src/scenarios/github /path/to/csvs` |
-| Start source services only | `docker compose -f src/eval/docker-compose.yaml up -d --wait` |
-| Stop source services | `docker compose -f src/eval/docker-compose.yaml down` |
+| Start source services only | `docker compose -f src/data-sources/docker-compose.yaml up -d --wait` |
+| Stop source services | `docker compose -f src/data-sources/docker-compose.yaml down` |
 | Load data manually | `bash src/data-sources/github/postgres_init.sh src/data-sources/github` |
 | View an agent transcript | `cat results/github/*/agent.log` |
 | View judge verdicts | `cat results/github/*/verdicts.json` |
