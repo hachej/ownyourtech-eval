@@ -1,0 +1,121 @@
+post_id,text,impressions,reactions,comments,shares,published_at
+li_0001,Hot take: most data pipelines are over-engineered.,6997,543,41,29,2024-01-13 15:42:07
+li_0002,Why I switched from Airflow to Dagster — a thread.,3934,224,28,4,2024-06-02 14:53:36
+li_0003,Why event-driven architectures are worth the complexity.,2582,98,31,7,2024-08-23 06:52:38
+li_0004,The gap between a prototype and production is always larger than expected.,716,34,12,4,2024-06-06 13:50:11
+li_0005,Grateful for the data community — always learning from you all.,5506,361,44,52,2024-03-05 20:53:58
+li_0006,Automated testing for data pipelines saved us from a major outage.,1559,19,4,11,2024-03-19 18:28:46
+li_0007,Reading 'Designing Data-Intensive Applications' for the third time.,592,31,10,3,2024-10-10 13:20:09
+li_0008,Building in public: our analytics stack journey.,1378,42,22,5,2025-03-28 05:54:14
+li_0009,The gap between a prototype and production is always larger than expected.,855,62,15,5,2024-02-29 20:15:30
+li_0010,Newsletter engagement metrics are fascinating to analyze.,4213,254,52,10,2024-09-16 03:01:48
+li_0011,Sometimes the simplest solution is a cron job and a shell script.,2730,184,17,16,2025-01-28 18:22:47
+li_0012,Grateful for the data community — always learning from you all.,259,5,3,1,2024-03-01 00:04:15
+li_0013,Why event-driven architectures are worth the complexity.,745,45,10,4,2024-11-29 20:48:30
+li_0014,My productivity hack: write the SQL query before the schema.,2216,70,11,20,2024-06-26 11:26:56
+li_0015,Automated testing for data pipelines saved us from a major outage.,16909,974,278,57,2024-10-25 06:21:51
+li_0016,Controversial opinion: you don't need a data lake yet.,336,8,6,1,2024-04-14 23:25:46
+li_0017,Pair programming with an AI agent — surprisingly effective.,2359,102,28,22,2025-01-19 21:01:18
+li_0018,Grateful for the data community — always learning from you all.,98,3,1,0,2024-05-29 07:23:15
+li_0019,Spent the weekend refactoring our ETL and cut costs by 40%.,598,35,4,2,2025-03-15 07:41:09
+li_0020,Open source tools have completely transformed how I work.,374,10,1,2,2025-02-12 01:07:25
+li_0021,Sometimes the simplest solution is a cron job and a shell script.,2311,126,6,10,2024-05-12 09:10:12
+li_0022,Newsletter engagement metrics are fascinating to analyze.,1689,130,33,4,2024-09-14 22:22:50
+li_0023,Newsletter engagement metrics are fascinating to analyze.,4869,116,94,18,2025-05-25 12:39:38
+li_0024,Hot take: most data pipelines are over-engineered.,5383,141,82,46,2024-02-02 07:15:59
+li_0025,Controversial opinion: you don't need a data lake yet.,5986,267,112,57,2025-05-13 14:57:44
+li_0026,5 things I wish I knew before building my first data warehouse.,1307,98,22,6,2025-04-23 16:50:32
+li_0027,My productivity hack: write the SQL query before the schema.,299,16,4,0,2025-03-17 14:41:49
+li_0028,Reflecting on 10 years in tech — still love building things.,1948,43,33,17,2025-03-07 18:13:10
+li_0029,Open source tools have completely transformed how I work.,515,16,3,1,2024-10-08 08:14:15
+li_0030,Just gave a talk on modern data stacks at the local meetup.,536,27,6,1,2024-08-31 22:01:20
+li_0031,Controversial opinion: you don't need a data lake yet.,561,25,10,4,2025-01-13 06:02:22
+li_0032,The gap between a prototype and production is always larger than expected.,772,59,8,3,2025-01-11 21:33:54
+li_0033,The gap between a prototype and production is always larger than expected.,15924,1079,250,113,2024-07-22 23:58:47
+li_0034,Hot take: most data pipelines are over-engineered.,231,13,0,1,2025-04-21 17:33:42
+li_0035,"Data quality is everyone's responsibility, not just the DE team.",3101,147,15,26,2025-03-28 12:15:18
+li_0036,"Data quality is everyone's responsibility, not just the DE team.",255,4,2,2,2024-03-04 11:12:33
+li_0037,Just shipped a new feature that reduced query time by 80%.,735,36,10,2,2024-03-13 00:59:55
+li_0038,Learned something surprising about DuckDB performance today.,14226,718,40,58,2024-08-04 04:30:42
+li_0039,Newsletter engagement metrics are fascinating to analyze.,7300,219,38,16,2024-10-22 11:24:23
+li_0040,The future of analytics is local-first. Change my mind.,1841,146,16,16,2025-06-18 04:04:45
+li_0041,"The best dashboards tell a story, not just show numbers.",3335,159,45,13,2024-07-24 02:27:32
+li_0042,Controversial opinion: you don't need a data lake yet.,852,66,14,6,2025-06-26 02:15:50
+li_0043,Hiring is broken in data engineering. Here's what I'd change.,2399,87,14,12,2024-09-09 19:12:11
+li_0044,Why I switched from Airflow to Dagster — a thread.,538,38,1,1,2024-05-30 12:06:50
+li_0045,"Data quality is everyone's responsibility, not just the DE team.",783,55,5,1,2024-11-20 07:02:38
+li_0046,My productivity hack: write the SQL query before the schema.,174,5,2,1,2024-05-07 22:46:54
+li_0047,Reading 'Designing Data-Intensive Applications' for the third time.,24081,640,427,237,2024-11-11 07:13:47
+li_0048,Newsletter engagement metrics are fascinating to analyze.,708,54,12,6,2024-04-30 16:32:38
+li_0049,Reading 'Designing Data-Intensive Applications' for the third time.,1237,42,16,5,2025-01-05 14:20:29
+li_0050,Open source tools have completely transformed how I work.,895,32,13,4,2024-06-23 00:41:46
+li_0051,Why event-driven architectures are worth the complexity.,9898,732,119,96,2024-06-13 04:51:00
+li_0052,Just gave a talk on modern data stacks at the local meetup.,805,26,2,4,2024-10-16 09:00:45
+li_0053,Learned something surprising about DuckDB performance today.,1941,55,27,12,2024-02-20 11:38:53
+li_0054,My productivity hack: write the SQL query before the schema.,7739,380,82,68,2024-04-12 17:41:30
+li_0055,Grateful for the data community — always learning from you all.,3191,74,48,24,2024-06-14 12:58:33
+li_0056,Grateful for the data community — always learning from you all.,287,6,5,1,2024-09-18 11:46:44
+li_0057,"Data quality is everyone's responsibility, not just the DE team.",899,28,7,8,2024-06-03 13:12:27
+li_0058,Reflecting on 10 years in tech — still love building things.,7099,488,131,30,2024-02-23 20:09:44
+li_0059,Wrote a blog post on incremental materialization patterns.,2034,62,11,6,2024-01-25 23:03:18
+li_0060,Pair programming with an AI agent — surprisingly effective.,1092,63,7,9,2025-03-31 00:23:06
+li_0061,Automated testing for data pipelines saved us from a major outage.,1071,70,5,8,2024-12-16 08:45:50
+li_0062,Hot take: most data pipelines are over-engineered.,7920,544,26,66,2024-04-10 11:45:43
+li_0063,Reading 'Designing Data-Intensive Applications' for the third time.,348,9,5,0,2025-02-21 07:53:46
+li_0064,Controversial opinion: you don't need a data lake yet.,1227,13,18,7,2024-09-05 23:33:02
+li_0065,Why I switched from Airflow to Dagster — a thread.,7924,526,145,15,2024-01-10 08:38:11
+li_0066,Learned something surprising about DuckDB performance today.,269,7,2,2,2024-10-13 07:32:46
+li_0067,Learned something surprising about DuckDB performance today.,702,55,4,5,2024-07-22 16:28:04
+li_0068,"The best dashboards tell a story, not just show numbers.",284,13,0,0,2024-12-22 22:33:10
+li_0069,Reading 'Designing Data-Intensive Applications' for the third time.,8119,269,159,79,2024-02-15 03:31:08
+li_0070,Spent the weekend refactoring our ETL and cut costs by 40%.,2734,79,50,19,2025-05-16 20:34:14
+li_0071,Wrote a blog post on incremental materialization patterns.,1255,94,9,12,2025-05-06 00:34:47
+li_0072,Building in public: our analytics stack journey.,3866,191,47,33,2024-03-19 17:29:10
+li_0073,Reading 'Designing Data-Intensive Applications' for the third time.,265,5,5,1,2025-05-04 12:04:25
+li_0074,The gap between a prototype and production is always larger than expected.,771,20,2,4,2025-02-11 00:27:46
+li_0075,Automated testing for data pipelines saved us from a major outage.,428,5,2,4,2025-06-05 08:27:51
+li_0076,Grateful for the data community — always learning from you all.,1306,30,16,5,2024-05-04 13:31:31
+li_0077,Newsletter engagement metrics are fascinating to analyze.,9309,146,44,68,2024-12-03 18:20:33
+li_0078,Grateful for the data community — always learning from you all.,768,12,14,3,2024-03-25 05:38:39
+li_0079,Just shipped a new feature that reduced query time by 80%.,432,17,5,2,2024-05-27 07:01:10
+li_0080,Reflecting on 10 years in tech — still love building things.,1446,93,25,1,2024-02-18 22:21:55
+li_0081,Automated testing for data pipelines saved us from a major outage.,1310,48,5,4,2024-07-30 17:43:31
+li_0082,Open source tools have completely transformed how I work.,425,13,6,1,2024-03-20 16:19:47
+li_0083,The future of analytics is local-first. Change my mind.,1072,45,4,1,2025-01-28 14:39:59
+li_0084,Newsletter engagement metrics are fascinating to analyze.,3877,128,31,32,2024-06-30 09:22:27
+li_0085,The future of analytics is local-first. Change my mind.,364,27,2,1,2025-06-15 22:14:57
+li_0086,The future of analytics is local-first. Change my mind.,268,11,3,0,2025-06-12 22:10:31
+li_0087,"The best dashboards tell a story, not just show numbers.",2770,208,15,27,2024-06-02 01:03:11
+li_0088,Controversial opinion: you don't need a data lake yet.,9843,416,145,48,2025-01-07 05:09:44
+li_0089,Hiring is broken in data engineering. Here's what I'd change.,7025,138,52,23,2025-03-29 21:07:00
+li_0090,Reading 'Designing Data-Intensive Applications' for the third time.,2085,165,22,9,2025-01-25 12:27:27
+li_0091,Why event-driven architectures are worth the complexity.,4056,50,78,29,2025-05-19 05:29:18
+li_0092,Newsletter engagement metrics are fascinating to analyze.,233,5,3,1,2024-11-20 05:24:59
+li_0093,Spent the weekend refactoring our ETL and cut costs by 40%.,475,36,4,0,2025-01-04 21:35:30
+li_0094,"Data quality is everyone's responsibility, not just the DE team.",3462,201,20,15,2024-05-01 05:06:07
+li_0095,Reflecting on 10 years in tech — still love building things.,1579,53,3,3,2025-02-25 16:46:21
+li_0096,Just gave a talk on modern data stacks at the local meetup.,2268,77,36,12,2025-05-17 14:51:18
+li_0097,Why I switched from Airflow to Dagster — a thread.,720,23,5,5,2024-09-16 23:38:01
+li_0098,Reading 'Designing Data-Intensive Applications' for the third time.,763,50,14,5,2024-01-13 07:57:19
+li_0099,"The best dashboards tell a story, not just show numbers.",223,17,1,1,2024-04-05 06:02:06
+li_0100,Reflecting on 10 years in tech — still love building things.,1873,115,33,9,2024-04-11 18:24:51
+li_0101,Why I switched from Airflow to Dagster — a thread.,1864,116,30,2,2024-07-31 07:18:14
+li_0102,Automated testing for data pipelines saved us from a major outage.,1236,29,5,8,2025-03-12 12:40:43
+li_0103,"Data quality is everyone's responsibility, not just the DE team.",2231,117,28,9,2024-10-15 03:10:39
+li_0104,Hiring is broken in data engineering. Here's what I'd change.,9865,304,128,17,2024-12-03 01:55:13
+li_0105,The gap between a prototype and production is always larger than expected.,596,21,2,2,2024-06-19 23:59:09
+li_0106,"The best dashboards tell a story, not just show numbers.",817,44,11,5,2024-03-16 06:36:47
+li_0107,Just gave a talk on modern data stacks at the local meetup.,1069,34,10,1,2024-10-29 23:34:27
+li_0108,Reflecting on 10 years in tech — still love building things.,1054,38,12,7,2025-06-03 16:56:12
+li_0109,Grateful for the data community — always learning from you all.,370,16,1,0,2025-01-08 20:15:54
+li_0110,Reading 'Designing Data-Intensive Applications' for the third time.,150,7,2,0,2024-04-30 09:49:07
+li_0111,Why event-driven architectures are worth the complexity.,3137,212,8,23,2024-03-02 19:31:00
+li_0112,Hot take: most data pipelines are over-engineered.,611,34,3,5,2024-04-29 07:46:24
+li_0113,Open source tools have completely transformed how I work.,200,8,3,1,2024-09-02 13:17:33
+li_0114,The gap between a prototype and production is always larger than expected.,5289,371,68,25,2024-04-24 14:14:36
+li_0115,Why event-driven architectures are worth the complexity.,512,7,4,1,2024-03-17 00:32:05
+li_0116,Building in public: our analytics stack journey.,4420,221,84,24,2024-04-01 22:25:01
+li_0117,Hiring is broken in data engineering. Here's what I'd change.,903,26,12,6,2025-03-21 02:07:50
+li_0118,Wrote a blog post on incremental materialization patterns.,13866,877,196,74,2024-05-16 07:46:14
+li_0119,The future of analytics is local-first. Change my mind.,1670,25,27,13,2024-12-11 06:59:44
+li_0120,Just gave a talk on modern data stacks at the local meetup.,9058,554,92,63,2024-10-08 12:35:56
