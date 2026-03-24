@@ -1,0 +1,44 @@
+id = "M001-E002-S002"
+parent = "M001-E002"
+title = "S3 and REST API init scripts"
+status = "ready"
+created = 2026-03-14
+
+[outcome]
+description = """
+s3_init.sh uploads shortio_clicks.jsonl and walker_events.jsonl to LocalStack S3.
+api_server.py serves youtube_videos as a REST endpoint.
+"""
+
+[acceptance_criteria]
+executable = true
+
+[[acceptance_criteria.criteria]]
+test = "integration"
+description = "s3_init.sh creates content-creator-bucket and uploads 2 JSONL files"
+
+[[acceptance_criteria.criteria]]
+test = "integration"
+description = "api_server.py serves GET /content-creator/youtube_videos returning JSON array"
+
+[[acceptance_criteria.criteria]]
+test = "integration"
+description = "s3_init.sh is idempotent (bucket creation uses || true)"
+
+[context]
+relevant_paths = [
+    "src/data-sources/github/s3_init.sh",
+    "src/data-sources/github/api_server.py",
+]
+input_fixtures = []
+depends_on = []
+
+[handoff]
+implementation_hints = """
+Copy github patterns. S3: aws --endpoint-url s3 mb + s3 cp for each JSONL file.
+API: Flask app, load_csv helper reads from CSV, serves as JSON. Port 5055.
+"""
+reference_files = [
+    "src/data-sources/github/s3_init.sh",
+    "src/data-sources/github/api_server.py",
+]

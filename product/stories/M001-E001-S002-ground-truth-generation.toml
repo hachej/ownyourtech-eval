@@ -1,0 +1,61 @@
+id = "M001-E001-S002"
+parent = "M001-E001"
+title = "Ground truth CSV generation"
+status = "ready"
+created = 2026-03-14
+
+[outcome]
+description = """
+A Python script (or extension of S001) that generates the 3 ground truth CSVs
+by applying the correct transformation logic to the synthetic source data.
+"""
+
+[acceptance_criteria]
+executable = true
+
+[[acceptance_criteria.criteria]]
+test = "manual"
+description = "creator__accounts.csv: one row per unique email across ghost_member + mailerlite + walker + shortio, sorted by email"
+
+[[acceptance_criteria.criteria]]
+test = "manual"
+description = "creator__accounts.csv has columns: email, name, email_domain, is_personal_email, is_ghost_member, is_mailerlite_subscriber, is_walker_visitor, email_count, email_opened_count, email_open_rate, mailerlite_status, mailerlite_subscribed_at, first_seen"
+
+[[acceptance_criteria.criteria]]
+test = "manual"
+description = "creator__content_performance.csv: one row per content piece (linkedin + youtube + ghost_post), sorted by content_id, platform"
+
+[[acceptance_criteria.criteria]]
+test = "manual"
+description = "creator__content_performance.csv has columns: content_id, platform, title_or_text, published_at, published_month, impressions_or_views_or_delivered, engagements, engagement_rate, performance_tier, content_length_bucket"
+
+[[acceptance_criteria.criteria]]
+test = "manual"
+description = "creator__monthly_metrics.csv: one row per month, sorted by month"
+
+[[acceptance_criteria.criteria]]
+test = "manual"
+description = "creator__monthly_metrics.csv has columns: month, linkedin_posts_count, linkedin_impressions, linkedin_engagements, youtube_videos_count, youtube_views, newsletter_posts_count, newsletter_delivered, newsletter_opened, new_ghost_members, new_mailerlite_subscribers, total_website_sessions, total_link_clicks"
+
+[[acceptance_criteria.criteria]]
+test = "manual"
+description = "All CSVs sorted by first two columns (correctness judge does ORDER BY 1,2)"
+
+[context]
+relevant_paths = [
+    "src/data-sources/github/gt/github/",
+]
+input_fixtures = []
+depends_on = ["M001-E001-S001"]
+
+[handoff]
+implementation_hints = """
+Build ground truth directly from the generated source data using pandas/duckdb.
+This ensures perfect consistency. The transformation logic IS the ground truth —
+document it clearly so we can audit it.
+
+For accounts: FULL OUTER JOIN on email across ghost_member, mailerlite, walker, shortio.
+For content_performance: UNION of linkedin posts, youtube videos, ghost posts with normalized columns.
+For monthly_metrics: GROUP BY month across all sources.
+"""
+reference_files = []

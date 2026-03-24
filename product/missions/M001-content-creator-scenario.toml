@@ -1,0 +1,115 @@
+# Mission: Content Creator Scenario
+# A new eval scenario based on real content creator data patterns (timo-data + propel-data)
+
+id = "M001"
+title = "Content Creator Eval Scenario"
+status = "draft"
+created = 2026-03-14
+
+[outcome]
+description = """
+A content creator can run the eval and see whether an agent builds a correct,
+principled local analytics stack from 7 scattered sources — LinkedIn posts,
+YouTube videos, Ghost blog, MailerLite newsletter, website analytics, link clicks.
+The agent must resolve identities across sources, normalize content metrics across
+platforms, aggregate monthly KPIs, and pick a local BI tool using the KB.
+"""
+
+user_progress = "From 'we only have the github data engineering scenario' to 'we also test content creator analytics with identity resolution, content normalization, and BI tool selection'"
+
+[testing]
+approach = "agent-judgment"
+criteria = [
+    "eval.sh content-creator runs end-to-end without manual intervention",
+    "correctness judge passes: all 3 output models match ground truth",
+    "accounts model resolves identities correctly (one row per unique email across sources)",
+    "content_performance model normalizes metrics across linkedin, youtube, and newsletter",
+    "monthly_metrics aggregates are correct per month",
+    "kg_compliance judge exercises BI tool selection (agent must use oyt kg evaluate)",
+    "Synthetic data is realistic: ~120 linkedin posts, ~50 youtube videos, ~200 ghost members, ~200 mailerlite subscribers, ~60 newsletter posts, ~150 link clicks, ~300 website events",
+]
+
+validator_context = [
+    "src/scenarios/content-creator/",
+    "src/data-sources/content-creator/",
+    "src/judges/correctness.py",
+]
+
+[context]
+related_docs = [
+    "VISION.md",
+    "VALUES.md",
+    "AGENTS.md",
+]
+value_levels = ["L05"]
+relevant_paths = [
+    "src/scenarios/github/",
+    "src/data-sources/github/",
+    "src/eval/eval.sh",
+    "src/judges/",
+]
+
+[scope]
+in_scope = [
+    "Generate synthetic source data (CSV, JSONL) based on timo-data and propel-data schemas",
+    "Write init scripts for all 5 source types (Postgres, MongoDB, S3, REST API, flat files)",
+    "Write SPEC.md describing all sources, connection details, and 3 expected output models",
+    "Write scenario.yaml with credentials, judges, and expected model definitions",
+    "Generate ground truth CSVs for all 3 models",
+    "Verify eval.sh runs the scenario end-to-end",
+]
+out_of_scope = [
+    "Changes to eval.sh or the judge framework",
+    "New judges specific to this scenario",
+    "Real API integrations (all data is synthetic, loaded via init scripts)",
+]
+
+[notes]
+considerations = """
+## Data Sources (7 sources across 5 types)
+
+| Source              | Eval Service | Rows | Key Columns                                                    |
+|---------------------|-------------|------|----------------------------------------------------------------|
+| AuthoredUp (LinkedIn)| Flat files  | ~120 | post_id, text, impressions, reactions, comments, shares, published_at |
+| YouTube videos      | REST API    | ~50  | video_id, title, view_count, like_count, comment_count, published_at |
+| Ghost members       | Postgres    | ~200 | email, name, status, email_count, email_opened_count, email_open_rate |
+| Ghost posts         | Postgres    | ~60  | title, slug, published_at, word_count, email_delivered, email_opened |
+| MailerLite subs     | MongoDB     | ~200 | email, status, groups, subscribed_at                           |
+| Short.io clicks     | S3 (JSONL)  | ~150 | clicked_at, utm_source, utm_medium, utm_campaign, email        |
+| Walker events       | S3 (JSONL)  | ~300 | session_id, timestamp, event_name, page_path, email            |
+
+## Expected Output Models (3)
+
+### creator__accounts
+One row per person, identity resolved across sources via email.
+Columns: email, name, email_domain, is_personal_email, is_ghost_member,
+is_mailerlite_subscriber, is_walker_visitor, email_count, email_opened_count,
+email_open_rate, mailerlite_status, mailerlite_subscribed_at, first_seen.
+
+### creator__content_performance
+One row per content piece across platforms (linkedin, youtube, newsletter).
+Columns: content_id, platform, title_or_text, published_at, published_month,
+impressions_or_views_or_delivered, engagements, engagement_rate,
+performance_tier (viral/high/medium/low), content_length_bucket (linkedin only).
+
+### creator__monthly_metrics
+One row per month.
+Columns: month, linkedin_posts_count, linkedin_impressions, linkedin_engagements,
+youtube_videos_count, youtube_views, newsletter_posts_count, newsletter_delivered,
+newsletter_opened, new_ghost_members, new_mailerlite_subscribers,
+total_website_sessions, total_link_clicks.
+
+## BI Tool Selection
+
+The SPEC tells the agent to connect a local BI tool for interactive exploration.
+No technology prescribed — agent must use oyt kg evaluate to pick one.
+This tests whether the KB has good BI tool defaults for local-first analytics.
+
+## Data Generation Approach
+
+Generate synthetic data with realistic distributions. Use email overlap across
+sources to create the identity resolution challenge: ~60% of ghost members also
+in mailerlite, ~30% appear in walker events, ~10% in shortio clicks. Anonymize
+but keep the matching challenge intact. Use timo-data sample schemas for column
+structures and propel-data patterns for realistic engagement distributions.
+"""

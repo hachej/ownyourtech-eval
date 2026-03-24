@@ -1,40 +1,26 @@
 # Scenario: Content Creator
-# Agent builds a local analytics stack from 7 scattered sources,
-# resolves identities, normalizes metrics, and picks a BI tool.
+# Agent connects to real APIs, extracts data, resolves identities,
+# builds analytics models, and picks a BI tool.
 
 name: content-creator
 description: >
-  Extract content creator data from Postgres, MongoDB, REST API, S3, and flat files.
+  Extract content creator data from Ghost, MailerLite, and AuthoredUp APIs.
   Transform into analytics models: accounts, content performance, and monthly metrics.
 
 spec: SPEC.md
-
-source: content-creator
+persona: persona.yaml
 
 credentials:
-  - PG_HOST=localhost
-  - PG_PORT=5433
-  - PG_USER=postgres
-  - PG_PASSWORD=testelt
-  - PG_DATABASE=content_creator
-  - MONGO_URI=mongodb://localhost:27017/?directConnection=true
-  - MONGO_DATABASE=content_creator
-  - API_BASE_URL=http://localhost:5055
-  - AWS_ACCESS_KEY_ID=test
-  - AWS_SECRET_ACCESS_KEY=test
-  - AWS_DEFAULT_REGION=us-west-2
-  - AWS_ENDPOINT_URL=http://localhost:4566
-  - S3_BUCKET=content-creator-bucket
+  - GHOST_API_URL=${GHOST_API_URL}
+  - GHOST_API_KEY=${GHOST_API_KEY}
+  - MAILERLITE_API_KEY=${MAILERLITE_API_KEY}
+  - AUTHOREDUP_API_KEY=${AUTHOREDUP_API_KEY}
 
 judges:
-  - correctness
   - code_quality
   - kg_compliance
 
 expected_models:
   - name: creator__accounts
-    ground_truth: ../../data-sources/content-creator/gt/content-creator/creator__accounts.csv
   - name: creator__content_performance
-    ground_truth: ../../data-sources/content-creator/gt/content-creator/creator__content_performance.csv
   - name: creator__monthly_metrics
-    ground_truth: ../../data-sources/content-creator/gt/content-creator/creator__monthly_metrics.csv

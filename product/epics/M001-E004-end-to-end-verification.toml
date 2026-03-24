@@ -1,0 +1,50 @@
+id = "M001-E004"
+parent = "M001"
+title = "End-to-End Verification"
+status = "active"
+created = 2026-03-14
+depends_on = ["M001-E002", "M001-E003"]
+
+[outcome]
+description = """
+eval.sh content-creator runs end-to-end: Docker services start, data loads,
+agent workdir is prepared correctly, and ground truth can be verified with
+the check.py script.
+"""
+
+[job_story]
+description = """
+When I run eval.sh content-creator,
+I need everything to work without manual intervention,
+so that I'm confident the scenario is ready for real eval runs.
+"""
+
+[testing]
+approach = "agent-judgment"
+criteria = [
+    "Docker services start and all init scripts run without errors",
+    "Agent workdir contains SPEC.md, CLAUDE.md, and flat files in data/content-creator/",
+    "python src/judges/check.py src/scenarios/content-creator <gt-dir> passes with all 3 models",
+]
+validator_context = [
+    "src/eval/eval.sh",
+    "src/scenarios/content-creator/",
+    "src/data-sources/content-creator/",
+]
+
+[context]
+relevant_paths = [
+    "src/eval/eval.sh",
+    "src/judges/check.py",
+    "src/judges/correctness.py",
+]
+dependencies = []
+
+[notes]
+considerations = """
+We verify the plumbing works (init scripts, file copying, credentials) without
+running a full agent eval (which costs money). The key test is that check.py
+can validate ground truth CSVs against themselves — proving the format is correct.
+"""
+
+estimated_stories = 1

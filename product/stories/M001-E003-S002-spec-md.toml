@@ -1,0 +1,58 @@
+id = "M001-E003-S002"
+parent = "M001-E003"
+title = "SPEC.md task specification"
+status = "ready"
+created = 2026-03-14
+
+[outcome]
+description = """
+src/scenarios/content-creator/SPEC.md describing the complete task: all 7 sources
+with connection details, 3 output models with exact column specs, BI tool requirement,
+deliverable format, and constraints.
+"""
+
+[acceptance_criteria]
+executable = true
+
+[[acceptance_criteria.criteria]]
+test = "manual"
+description = "SPEC.md has an Objective section explaining the content creator analytics task"
+
+[[acceptance_criteria.criteria]]
+test = "manual"
+description = "SPEC.md describes all 7 sources with connection details (host, port, credentials, table/collection/endpoint/bucket names)"
+
+[[acceptance_criteria.criteria]]
+test = "manual"
+description = "SPEC.md defines creator__accounts with all 13 columns and descriptions"
+
+[[acceptance_criteria.criteria]]
+test = "manual"
+description = "SPEC.md defines creator__content_performance with all 10 columns and descriptions"
+
+[[acceptance_criteria.criteria]]
+test = "manual"
+description = "SPEC.md defines creator__monthly_metrics with all 13 columns and descriptions"
+
+[[acceptance_criteria.criteria]]
+test = "manual"
+description = "SPEC.md asks agent to pick a local BI tool for interactive exploration without prescribing one"
+
+[[acceptance_criteria.criteria]]
+test = "manual"
+description = "SPEC.md specifies deliverable: code in stack/, pipeline that exits 0, report.md, BI tool accessible"
+
+[context]
+relevant_paths = [
+    "src/scenarios/github/SPEC.md",
+]
+input_fixtures = []
+depends_on = []
+
+[handoff]
+implementation_hints = """
+Follow the github SPEC.md structure exactly. The BI tool section should say
+something like: 'Connect a BI tool so the creator can explore these models
+interactively. The tool must run locally. Choose the tool using oyt kg evaluate.'
+"""
+reference_files = ["src/scenarios/github/SPEC.md"]

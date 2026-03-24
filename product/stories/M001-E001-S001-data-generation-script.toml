@@ -1,0 +1,66 @@
+id = "M001-E001-S001"
+parent = "M001-E001"
+title = "Data generation script with identity overlap"
+status = "ready"
+created = 2026-03-14
+
+[outcome]
+description = """
+A Python script that generates all 7 source datasets with deterministic seed,
+realistic distributions, and controlled email overlap across sources.
+"""
+
+[acceptance_criteria]
+executable = true
+
+[[acceptance_criteria.criteria]]
+test = "manual"
+description = "Script generates 7 files in src/data-sources/content-creator/data/content-creator/"
+
+[[acceptance_criteria.criteria]]
+test = "manual"
+description = "authoredup_posts.csv has ~120 rows with post_id, text, impressions, reactions, comments, shares, published_at"
+
+[[acceptance_criteria.criteria]]
+test = "manual"
+description = "youtube_videos.csv has ~50 rows with video_id, title, view_count, like_count, comment_count, published_at"
+
+[[acceptance_criteria.criteria]]
+test = "manual"
+description = "ghost_member.csv has ~200 rows with email, name, status, created_at, email_count, email_opened_count, email_open_rate"
+
+[[acceptance_criteria.criteria]]
+test = "manual"
+description = "ghost_post.csv has ~60 rows with post_id, title, slug, published_at, word_count, email_delivered_count, email_opened_count"
+
+[[acceptance_criteria.criteria]]
+test = "manual"
+description = "mailerlite_subscriber.csv has ~200 rows with email, status, groups, subscribed_at"
+
+[[acceptance_criteria.criteria]]
+test = "manual"
+description = "shortio_clicks.jsonl has ~150 rows with clicked_at, utm_source, utm_medium, utm_campaign, email"
+
+[[acceptance_criteria.criteria]]
+test = "manual"
+description = "walker_events.jsonl has ~300 rows with session_id, timestamp, event_name, page_path, email"
+
+[[acceptance_criteria.criteria]]
+test = "manual"
+description = "~60% of ghost emails also appear in mailerlite, ~30% in walker, ~10% in shortio"
+
+[context]
+relevant_paths = [
+    "src/data-sources/github/data/github/",
+]
+input_fixtures = []
+depends_on = []
+
+[handoff]
+implementation_hints = """
+Use a fixed random seed for reproducibility. Create a pool of ~250 unique emails first,
+then distribute across sources with controlled overlap. Use faker or manual generation
+for names, post text, etc. LinkedIn and YouTube are content (no email column).
+Ghost posts are also content. Only ghost_member, mailerlite, walker, and shortio have emails.
+"""
+reference_files = []
