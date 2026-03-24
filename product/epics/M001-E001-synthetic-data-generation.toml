@@ -1,0 +1,46 @@
+id = "M001-E001"
+parent = "M001"
+title = "Synthetic Data Generation"
+status = "active"
+created = 2026-03-14
+depends_on = []
+
+[outcome]
+description = """
+All 7 source datasets exist as CSV/JSONL files with realistic distributions,
+email overlap for identity resolution, and enough volume to exercise the models.
+"""
+
+[job_story]
+description = """
+When building the content-creator scenario,
+I need realistic synthetic data across all 7 sources,
+so that the eval tests real-world challenges like identity resolution and content normalization.
+"""
+
+[testing]
+approach = "agent-judgment"
+criteria = [
+    "7 source files exist in src/data-sources/content-creator/data/content-creator/",
+    "Email overlap: ~60% of ghost members also in mailerlite, ~30% in walker events, ~10% in shortio",
+    "Row counts: ~120 linkedin, ~50 youtube, ~200 ghost members, ~60 ghost posts, ~200 mailerlite, ~150 shortio, ~300 walker",
+    "All column schemas match the mission spec",
+]
+validator_context = ["src/data-sources/content-creator/data/"]
+
+[context]
+relevant_paths = [
+    "src/data-sources/github/data/github/",
+]
+dependencies = []
+
+[notes]
+considerations = """
+Use a Python script to generate all data deterministically (fixed seed).
+The identity resolution challenge is the key: a pool of ~250 unique emails,
+distributed across sources with controlled overlap percentages.
+LinkedIn posts and YouTube videos don't have emails (they're content, not people).
+Ghost posts also don't have emails (they're content published by the creator).
+"""
+
+estimated_stories = 2

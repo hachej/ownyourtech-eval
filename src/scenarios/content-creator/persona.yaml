@@ -1,0 +1,26 @@
+# Creator Persona
+# The agent reads this to understand who it's helping and what platforms they use.
+
+name: Alex
+role: Solo content creator & educator
+
+platforms:
+  - name: LinkedIn
+    usage: Primary content channel — posts 2-3x/week
+    data_access: AuthoredUp export API (provides post text + performance metrics)
+
+  - name: Ghost
+    usage: Self-hosted blog and newsletter — weekly posts, growing subscriber base
+    data_access: Ghost Admin API (provides members + posts with email performance)
+
+  - name: MailerLite
+    usage: Email marketing — nurture sequences, workshops, masterclass signups
+    data_access: MailerLite API (provides subscribers with group memberships)
+
+goals:
+  - Understand audience overlap between newsletter subscribers and email marketing
+  - Track content performance across LinkedIn and newsletter
+  - See monthly trends to know what's working
+  - Explore the data interactively with a local BI tool
+
+response_style: brief, non-technical

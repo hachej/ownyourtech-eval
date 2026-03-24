@@ -1,0 +1,26 @@
+# Scenario: Content Creator
+# Agent connects to real APIs, extracts data, resolves identities,
+# builds analytics models, and picks a BI tool.
+
+name: content-creator
+description: >
+  Extract content creator data from Ghost, MailerLite, and AuthoredUp APIs.
+  Transform into analytics models: accounts, content performance, and monthly metrics.
+
+spec: SPEC.md
+persona: persona.yaml
+
+credentials:
+  - GHOST_API_URL=${GHOST_API_URL}
+  - GHOST_API_KEY=${GHOST_API_KEY}
+  - MAILERLITE_API_KEY=${MAILERLITE_API_KEY}
+  - AUTHOREDUP_API_KEY=${AUTHOREDUP_API_KEY}
+
+judges:
+  - code_quality
+  - kg_compliance
+
+expected_models:
+  - name: creator__accounts
+  - name: creator__content_performance
+  - name: creator__monthly_metrics

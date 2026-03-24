@@ -55,14 +55,14 @@ services:
     container_name: eval-api
     working_dir: /app
     volumes:
-      - ./github:/app:ro
+      - ./:/app:ro
     command: sh -c "pip install -q flask && python api_server.py"
     ports:
       - "5055:5055"
     networks:
       - eval_network
     healthcheck:
-      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:5055/github/repository\")'"]
+      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:5055/health\")'"]
       interval: 5s
       timeout: 5s
       retries: 10

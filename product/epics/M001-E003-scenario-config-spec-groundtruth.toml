@@ -1,0 +1,58 @@
+id = "M001-E003"
+parent = "M001"
+title = "Scenario Config, Spec & Ground Truth"
+status = "active"
+created = 2026-03-14
+depends_on = ["M001-E001"]
+
+[outcome]
+description = """
+scenario.yaml, SPEC.md, and 3 ground truth CSVs exist. The SPEC describes all
+sources with connection details, defines the 3 output models with exact column specs,
+and asks the agent to pick a local BI tool. Ground truth CSVs are generated from
+the synthetic data using the correct transformation logic.
+"""
+
+[job_story]
+description = """
+When an agent runs the content-creator eval,
+I need a clear spec and correct ground truth,
+so that the correctness judge can score the agent's output accurately.
+"""
+
+[testing]
+approach = "agent-judgment"
+criteria = [
+    "scenario.yaml has correct credentials for all source types",
+    "SPEC.md describes all 7 sources with connection details and column descriptions",
+    "SPEC.md defines all 3 output models with exact column names and descriptions",
+    "SPEC.md asks agent to pick a local BI tool (no technology prescribed)",
+    "3 ground truth CSVs exist and are sorted by columns 1 and 2",
+    "Ground truth accounts model has correct identity resolution (one row per unique email)",
+    "Ground truth content_performance has correct normalization across platforms",
+    "Ground truth monthly_metrics has correct aggregations",
+]
+validator_context = [
+    "src/scenarios/content-creator/",
+    "src/data-sources/content-creator/gt/",
+]
+
+[context]
+relevant_paths = [
+    "src/scenarios/github/scenario.yaml",
+    "src/scenarios/github/SPEC.md",
+    "src/data-sources/github/gt/github/",
+]
+dependencies = []
+
+[notes]
+considerations = """
+Ground truth generation should use the same Python script as data generation
+(or a companion script) to ensure consistency. The transformation logic for
+ground truth must be deterministic and well-documented so we can verify it.
+
+The BI tool question in the SPEC is intentionally open-ended — the agent must
+use oyt kg evaluate to pick one. This exercises the KB's BI tool defaults.
+"""
+
+estimated_stories = 3

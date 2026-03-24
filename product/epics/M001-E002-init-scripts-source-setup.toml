@@ -1,0 +1,50 @@
+id = "M001-E002"
+parent = "M001"
+title = "Init Scripts & Source Setup"
+status = "active"
+created = 2026-03-14
+depends_on = ["M001-E001"]
+
+[outcome]
+description = """
+All init scripts exist and correctly load synthetic data into Docker services:
+Postgres (ghost_member, ghost_post), MongoDB (mailerlite_subscriber),
+S3 (shortio_clicks.jsonl, walker_events.jsonl), REST API (youtube_videos, transactions).
+Flat files (authoredup_posts.csv) are copied by eval.sh automatically.
+"""
+
+[job_story]
+description = """
+When eval.sh runs the content-creator scenario,
+I need init scripts that load data into the right Docker services,
+so that the agent can connect to all sources during the eval.
+"""
+
+[testing]
+approach = "agent-judgment"
+criteria = [
+    "postgres_init.sh creates content_creator database with ghost_member and ghost_post tables",
+    "mongo_init.py loads mailerlite_subscriber collection",
+    "s3_init.sh uploads shortio_clicks.jsonl and walker_events.jsonl to content-creator-bucket",
+    "api_server.py serves /content-creator/youtube_videos endpoint returning JSON array",
+    "All scripts are idempotent (DROP/recreate on each run)",
+]
+validator_context = ["src/data-sources/content-creator/"]
+
+[context]
+relevant_paths = [
+    "src/data-sources/github/postgres_init.sh",
+    "src/data-sources/github/mongo_init.py",
+    "src/data-sources/github/s3_init.sh",
+    "src/data-sources/github/api_server.py",
+]
+dependencies = []
+
+[notes]
+considerations = """
+Follow exact patterns from the github scenario init scripts.
+The api_server.py serves on port 5055 — same as github. Both scenarios
+can't run simultaneously, but that's fine (eval.sh runs one at a time).
+"""
+
+estimated_stories = 2

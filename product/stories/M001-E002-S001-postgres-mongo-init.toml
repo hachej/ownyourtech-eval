@@ -1,0 +1,44 @@
+id = "M001-E002-S001"
+parent = "M001-E002"
+title = "Postgres and MongoDB init scripts"
+status = "ready"
+created = 2026-03-14
+
+[outcome]
+description = """
+postgres_init.sh loads ghost_member and ghost_post into Postgres.
+mongo_init.py loads mailerlite_subscriber into MongoDB.
+"""
+
+[acceptance_criteria]
+executable = true
+
+[[acceptance_criteria.criteria]]
+test = "integration"
+description = "postgres_init.sh creates content_creator database, ghost_member and ghost_post tables, loads all rows"
+
+[[acceptance_criteria.criteria]]
+test = "integration"
+description = "mongo_init.py drops and recreates content_creator database, loads mailerlite_subscriber collection"
+
+[[acceptance_criteria.criteria]]
+test = "integration"
+description = "Both scripts are idempotent (can run multiple times)"
+
+[context]
+relevant_paths = [
+    "src/data-sources/github/postgres_init.sh",
+    "src/data-sources/github/mongo_init.py",
+]
+input_fixtures = []
+depends_on = []
+
+[handoff]
+implementation_hints = """
+Copy github patterns exactly. Postgres: DROP DATABASE IF EXISTS, CREATE DATABASE, CREATE TABLE, COPY.
+MongoDB: client.drop_database(), db[collection].insert_many(). Use content_creator as database name.
+"""
+reference_files = [
+    "src/data-sources/github/postgres_init.sh",
+    "src/data-sources/github/mongo_init.py",
+]

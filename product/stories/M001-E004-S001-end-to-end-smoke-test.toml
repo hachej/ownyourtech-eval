@@ -1,0 +1,46 @@
+id = "M001-E004-S001"
+parent = "M001-E004"
+title = "End-to-end smoke test"
+status = "ready"
+created = 2026-03-14
+
+[outcome]
+description = """
+eval.sh content-creator runs through all setup steps (Docker, init scripts,
+workdir preparation) without errors. Ground truth validates against itself.
+"""
+
+[acceptance_criteria]
+executable = true
+
+[[acceptance_criteria.criteria]]
+test = "integration"
+description = "docker compose up starts all 4 services"
+
+[[acceptance_criteria.criteria]]
+test = "integration"
+description = "All init scripts (postgres, mongo, s3) run without errors"
+
+[[acceptance_criteria.criteria]]
+test = "integration"
+description = "Workdir contains SPEC.md, CLAUDE.md, and data/content-creator/authoredup_posts.csv"
+
+[[acceptance_criteria.criteria]]
+test = "integration"
+description = "Credentials from scenario.yaml are all valid (can connect to each source)"
+
+[context]
+relevant_paths = [
+    "src/eval/eval.sh",
+    "src/judges/check.py",
+]
+input_fixtures = []
+depends_on = ["M001-E002-S001", "M001-E002-S002", "M001-E003-S001", "M001-E003-S002", "M001-E003-S003"]
+
+[handoff]
+implementation_hints = """
+Don't run the full eval (costs agent budget). Instead, manually run the setup
+portions of eval.sh: docker compose up, init scripts, verify workdir creation.
+Then run check.py to verify ground truth format.
+"""
+reference_files = ["src/eval/eval.sh"]

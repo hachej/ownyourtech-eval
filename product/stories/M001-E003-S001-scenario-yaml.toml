@@ -1,0 +1,45 @@
+id = "M001-E003-S001"
+parent = "M001-E003"
+title = "scenario.yaml configuration"
+status = "ready"
+created = 2026-03-14
+
+[outcome]
+description = """
+src/scenarios/content-creator/scenario.yaml with credentials for all source types,
+judge configuration, and 3 expected model definitions with ground truth paths.
+"""
+
+[acceptance_criteria]
+executable = true
+
+[[acceptance_criteria.criteria]]
+test = "manual"
+description = "scenario.yaml has name: content-creator"
+
+[[acceptance_criteria.criteria]]
+test = "manual"
+description = "Credentials include PG_*, MONGO_*, API_BASE_URL, AWS_*, S3_BUCKET"
+
+[[acceptance_criteria.criteria]]
+test = "manual"
+description = "judges list includes correctness, code_quality, and kg_compliance"
+
+[[acceptance_criteria.criteria]]
+test = "manual"
+description = "expected_models lists creator__accounts, creator__content_performance, creator__monthly_metrics with correct ground_truth paths"
+
+[context]
+relevant_paths = [
+    "src/scenarios/github/scenario.yaml",
+]
+input_fixtures = []
+depends_on = []
+
+[handoff]
+implementation_hints = """
+Copy github scenario.yaml structure. Use content_creator as PG_DATABASE.
+Enable kg_compliance judge (commented out in github) since this scenario
+specifically tests BI tool selection via the KB.
+"""
+reference_files = ["src/scenarios/github/scenario.yaml"]
